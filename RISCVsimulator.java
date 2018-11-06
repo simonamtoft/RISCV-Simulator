@@ -39,16 +39,14 @@ public class RISCVsimulator {
         return inst;
     }
     
-    private static int addi() {
-        return 0;
-    }
+    // Executes one instruction
     private static void executeInstruction(int instruction){
         int opcode = instHelper.getOpcode(instruction); // Gets the opcode field of instruction
         
         // Funct3 and 7 is so often used that they will be found here, regardless of being used or not
         int funct3 = instHelper.getFunct3(instruction); // Gets the funct3 field of instruction
         int funct7 = instHelper.getFunct7(instruction); // Gets the funct7 field of instruction
-        int Rd, Rs1, Rs2, ImmI, ImmU;
+        int Rd, Rs1, Rs2, ImmI, ImmU;                   // Declared here to define scope outside switch
         
         switch(opcode){
             // R-type instructions:
@@ -62,13 +60,12 @@ public class RISCVsimulator {
                         switch(funct7){
                             case 0b0000000: // ADD
                                 reg[Rd] = reg[Rs1] + reg[Rs2];
-                                pc++;
                                 break;
                             case 0b0100000: // SUB
                                 reg[Rd] = reg[Rs1] - reg[Rs2];
-                                pc++;
                                 break;
                         }
+                        pc++;
                         break;
                     case 0b001: // SLL
                         break;
@@ -156,7 +153,8 @@ public class RISCVsimulator {
             case 0b1110011:
                 switch(funct3){
                     case 0b000: // ECALL / EBREAK
-                        switch(instHelper.getImmI(instruction)){
+                        Imm = instHelper.getImmI(instruction)
+                        switch(Imm){
                             case 0b000000000000: // ECALL
                                 break;
                             case 0b000000000001: // EBREAK
