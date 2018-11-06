@@ -166,6 +166,7 @@ public class RISCVsimulator {
                         Imm = instHelper.getImmI(instruction)
                         switch(Imm){
                             case 0b000000000000: // ECALL
+                                pc++;
                                 break;
                             case 0b000000000001: // EBREAK
                         }
