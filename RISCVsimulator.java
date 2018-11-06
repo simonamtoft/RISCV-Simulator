@@ -19,7 +19,7 @@ public class RISCVsimulator {
                     instHelper.getRs2(program[pc]), instHelper.getFunct3(program[pc]), instHelper.getFunct7(program[pc]));
             System.out.println(str);
             executeInstruction(program[pc]);
-            System.out.println("x"+instHelper.getRd(program[pc])+": " + reg[instHelper.getRd(program[pc])]);
+            System.out.println("x"+instHelper.getRd(program[pc-1])+": " + reg[instHelper.getRd(program[pc-1])]); //PC is incremented by executeInstruction, so we need to use the previous value
         }
         
         printRegisterContent(reg); 
