@@ -7,39 +7,39 @@
 
 
 public class inst {
-    public int getOpcode(int instruction) {
+    public static int getOpcode(int instruction) {
         return instruction & 0x7F; // Returns 7 right-most bits of instruction
     }
 
-    public int getRd(int instruction) {
+    public static int getRd(int instruction) {
         return (instruction >>7) & 0x1F; // Returns bits 11 to 7
     }
 
-    public int getFunct3(int instruction) {
+    public static int getFunct3(int instruction) {
         return (instruction>>12) & 0x7; // Returns bits 14 to 12
     }
 
-    public int getRs1 (int instruction) {
+    public static int getRs1 (int instruction) {
         return (instruction >>15) & 0x1F; // Returns bits 19 to 15
     }
 
-    public int getRs2 (int instruction) {
+    public static int getRs2 (int instruction) {
         return (instruction>>20) & 0x1F; // Returns bits 24 to 20
     }
 
-    public int getFunct7 (int instruction) {
+    public static int getFunct7 (int instruction) {
         return (instruction>>25) & 0x7F; // Returns bits 31 to 25
     }
 
-    public int getImmI (int instruction) {
+    public static int getImmI (int instruction) {
         return (instruction>>20) & 0xFFF; // Returns bits 31 to 20
     }
 
-    public int getImmS (int instruction) {
+    public static int getImmS (int instruction) {
         return getRd(instruction) | (getFunct7(instruction)<<5); // Returns bits 31 to 25 and 11 to 7
     }
 
-    public int getImmB (int instruction) {
+    public static int getImmB (int instruction) {
         int b11 = (instruction>>7) & 0x1;       // 11'th bit of immediate (7th bit of instruction)
         int b1to4 = (instruction>>8) & 0xF;     // Bits 1 to 4 of immediate (8 to 11 of instruction)
         int b5to10 = (instruction>>25) & 0x1F;  // Bits 5 to 10 of immediate (25 to 30 of instruction)
@@ -49,11 +49,11 @@ public class inst {
         return b11 << 11 | b1to4 << 1 | b5to10 << 5 | b12 << 12;
     }
 
-    public int getImmU(int instruction){
+    public static int getImmU(int instruction){
         return instruction & 0xFFFFF000; // Returns immediate
     }
 
-    public int getImmJ(int instruction) {
+    public static int getImmJ(int instruction) {
         int b12to19 = (instruction>>12) & 0xFF; // Bits 12 to 19 of immediate (12 to 19 of instruction)
         int b11 = (instruction>>20) & 0x1;      // Bit 11 of immediate (20th bit of instruction)
         int b1to10 = (instruction>>21) & 0x3FF; // Bit 1 to 10 of immediate (21 to 30 of instruction)
