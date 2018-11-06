@@ -14,7 +14,9 @@ public class RISCVsimulator {
         int[] program = getInstructions(path);  // Read all instructions from binary file
         
         while (pc < program.length) {
-            String str = String.format("Opcode: %02x Rd: %02x Rs1: %02x Rs2: %02x Funct3: %02x Funct7: %02x", instHelper.getOpcode(instruction), instHelper.getRd(instruction), instHelper.getRs1(instruction), instHelper.getRs2(instruction), instHelper.getFunct3(instruction), instHelper.getFunct7(instruction));
+            String str = String.format("Opcode: %02x Rd: %02x Rs1: %02x Rs2: %02x Funct3: %02x Funct7: %02x",
+                    instHelper.getOpcode(program[pc]), instHelper.getRd(program[pc]), instHelper.getRs1(program[pc]),
+                    instHelper.getRs2(program[pc]), instHelper.getFunct3(program[pc]), instHelper.getFunct7(program[pc]));
             System.out.println(str);
             executeInstruction(program[pc]);
             System.out.println("x"+instHelper.getRd(program[pc])+": " + reg[instHelper.getRd(program[pc])]);
