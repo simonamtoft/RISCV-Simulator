@@ -36,13 +36,19 @@ public class RISCVsimulator {
         return 0;
     }
     private static void executeInstruction(int instruction){
-        switch(instHelper.getOpcode(instruction)){
-            //R-type
+        int opcode = instHelper.getOpcode(instruction); // Gets the opcode field of instruction
+        
+        // Funct3 and 7 is so often used that they will be found here, regardless of being used or not
+        int funct3 = instHelper.getFunct3(instruction); // Gets the funct3 field of instruction
+        int funct7 = instHelper.getFunct7(instruction); // Gets the funct7 field of instruction
+        
+        switch(opcode){
+            // R-type instructions:
             // ADD / SUB / SLL / SLT / SLTU / XOR / SRL / SRA / OR / AND
             case 0b0110011:
-                switch(instHelper.getFunct3(instruction)){
+                switch(funct3){
                     case 0b000: // ADD / SUB
-                        switch(instHelper.getFunct7(instruction)){
+                        switch(funct7){
                             case 0b0000000: // ADD
                                 break;
                             case 0b0100000: // SUB
@@ -58,7 +64,7 @@ public class RISCVsimulator {
                     case 0b100: // XOR
                         break;
                     case 0b101: // SRL / SRA
-                        switch(instHelper.getFunct7(instruction)){
+                        switch(funct7){
                             case 0b0000000: // SRL
                                 break;
                             case 0b0100000: // SRA
@@ -71,13 +77,13 @@ public class RISCVsimulator {
                         break;
                 }
                 break;
-            //I-type
-            //JALR
+            // I-type instructions: 
+            // JALR
             case 0b1100111:
                 break;
-            //LB / LH / LW / LBU / LHU
+            // LB / LH / LW / LBU / LHU
             case 0b0000011:
-                switch(instHelper.getFunct3(instruction)){
+                switch(funct3){
                     case 0b000: // LB
                         break;
                     case 0b001: // LH
@@ -92,7 +98,7 @@ public class RISCVsimulator {
                 break;
             // ADDI / SLTI / SLTIU / XORI / ORI / ANDI / SLLI / SRLI / SRAI
             case 0b0010011:
-                switch(instHelper.getFunct3(instruction)){
+                switch(funct3){
                     case 0b000: // ADDI
                         reg[instHelper.getRd(instruction)] = reg[instHelper.getRs1(instruction)] + instHelper.getImmI(instruction);
                         break;
@@ -109,7 +115,7 @@ public class RISCVsimulator {
                     case 0b001: // SLLI
                         break;
                     case 0b101: // SRLI / SRAI
-                        switch(instHelper.getFunct7(instruction)){
+                        switch(funct7){
                             case 0b0000000: // SRLI
                                 break;
                             case 0b0100000: // SRAI
@@ -120,7 +126,7 @@ public class RISCVsimulator {
                 break;
             // FENCE / FENCE.I
             case 0b0001111:
-                switch(instHelper.getFunct3(instruction)){
+                switch(funct3){
                     case 0b000: // FENCE
                         break;
                     case 0b001: // FENCE.I
@@ -129,7 +135,7 @@ public class RISCVsimulator {
                 break;
             // ECALL / EBREAK / CSRRW / CSRRS / CSRRC / CSRRWI / CSRRSI / CSRRCI
             case 0b1110011:
-                switch(instHelper.getFunct3(instruction)){
+                switch(funct3){
                     case 0b000: // ECALL / EBREAK
                         switch(instHelper.getImmI(instruction)){
                             case 0b000000000000: // ECALL
@@ -154,7 +160,7 @@ public class RISCVsimulator {
             //S-type
             //SB / SH / SW
             case 0b0100011:
-                switch(instHelper.getFunct3(instruction)){
+                switch(funct3){
                     case 0b000: // SB
                         break;
                     case 0b001: // SH
@@ -166,7 +172,7 @@ public class RISCVsimulator {
             //B-type
             //BEQ / BNE / BLT / BGE / BLTU / BGEU
             case 0b1100011:
-                switch(instHelper.getFunct3(instruction)){
+                switch(funct3){
                     case 0b000: // BEQ
                         break;
                     case 0b001: // BNE
