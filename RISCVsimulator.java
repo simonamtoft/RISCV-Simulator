@@ -1,29 +1,38 @@
+/*
+ * Authors: Simon Amtoft Pedersen & Marc Sun Bøg
+ */
 import java.io.*;
 
 public class RISCVsimulator {
-
     static int pc;
 
     public static void main(String[] args) throws IOException {
+        instHelper inst = new instHelper();
         pc = 0;
-
         // Start reading from binary file
         String path = "addlarge.bin";
-        File inFile = new File(path);
-        DataInputStream bitstream = new DataInputStream(new FileInputStream(inFile));
+        int[] program = getInstructions(path);
 
-        // Input instructions in array from binary file
-        int[] instruction = new int[(int) inFile.length()/4];
-        for (int i = 0; i < instruction.length; i++) {
-            instruction[i] = (Integer.reverseBytes(bitstream.readInt())); // Bitstream is opposite order than RISC-V shows instructions.
-        }
-        bitstream.close();
-
-        System.out.println(String.format("0x%08X",instruction[0]));
+        /*for(int i = 0; i < program.length; i++){
+            System.out.println(inst.getOpcode(program[i]));
+            System.out.println(inst.getFunct3(program[i]));
+            System.out.println(inst.getFunct7(program[i]));
+        }*/
     }
 
     private static int addi() {
         return 0;
+    }
+
+    private static int[] getInstructions(String path) throws IOException {
+        File f = new File(path);
+        int[] inst = new int[(int) f.length()/4];
+        DataInputStream dis = new DataInputStream(new FileInputStream(f));
+        for(int i = 0; i < inst.length; i++){
+            inst[i] = Integer.reverseBytes(dis.readInt()); //Change endianness for easier bitwise manipulation
+        }
+        dis.close();
+        return inst;
     }
 
 }
