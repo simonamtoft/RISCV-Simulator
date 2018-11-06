@@ -52,12 +52,19 @@ public class RISCVsimulator {
             // R-type instructions:
             // ADD / SUB / SLL / SLT / SLTU / XOR / SRL / SRA / OR / AND
             case 0b0110011:
+                int Rd = instHelper.getRd(instruction);
+                int Rs1 = instHelper.getRs1(instruction);
+                int Rs2 = instHelper.getRs2(instruction);
                 switch(funct3){
                     case 0b000: // ADD / SUB
                         switch(funct7){
                             case 0b0000000: // ADD
+                                reg[Rd] = reg[Rs1] + reg[Rs2];
+                                pc++;
                                 break;
                             case 0b0100000: // SUB
+                                reg[Rd] = reg[Rs1] - reg[Rs2];
+                                pc++;
                                 break;
                         }
                         break;
@@ -104,9 +111,13 @@ public class RISCVsimulator {
                 break;
             // ADDI / SLTI / SLTIU / XORI / ORI / ANDI / SLLI / SRLI / SRAI
             case 0b0010011:
+                int Rd = instHelper.getRd(instruction);
+                int Rs1 = instHelper.getRs1(instruction);
+                int Imm = instHelper.getImmI(instruction);
                 switch(funct3){
                     case 0b000: // ADDI
-                        reg[instHelper.getRd(instruction)] = reg[instHelper.getRs1(instruction)] + instHelper.getImmI(instruction);
+                        reg[Rd] = reg[Rs1] + Imm;
+                        pc++;
                         break;
                     case 0b010: // SLTI
                         break;
@@ -200,6 +211,7 @@ public class RISCVsimulator {
             //AUIPC
             case 0b0010111:
                 reg[instHelper.getRd(instruction)] = instHelper.getImmU(instruction);
+                pc++;
                 break;
 
             //J-type
