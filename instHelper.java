@@ -31,7 +31,7 @@ public class instHelper {
     }
 
     public static int getImmI (int instruction) {
-        return (instruction>>20) & 0xFFF; // Returns bits 31 to 20
+        return (instruction>>20); // Returns bits 31 to 20
     }
 
     public static int getImmS (int instruction) {
