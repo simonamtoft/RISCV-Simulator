@@ -23,6 +23,7 @@ public class RISCVsimulator {
             pc++;
         }
         
+        printRegisterContent(reg); 
         System.out.println("Exiting...");
     }
      
