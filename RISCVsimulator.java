@@ -46,7 +46,7 @@ public class RISCVsimulator {
         // Funct3 and 7 is so often used that they will be found here, regardless of being used or not
         int funct3 = instHelper.getFunct3(instruction); // Gets the funct3 field of instruction
         int funct7 = instHelper.getFunct7(instruction); // Gets the funct7 field of instruction
-        int Rd, Rs1, Rs2, ImmI, ImmU;                   // Declared here to define scope outside switch
+        int Rd, Rs1, Rs2, ImmI, ImmU, ShiftAmt;                   // Declared here to define scope outside switch
         
         switch(opcode){
             // R-type instructions:
@@ -115,30 +115,41 @@ public class RISCVsimulator {
                 Imm = instHelper.getImmI(instruction);
                 switch(funct3){
                     case 0b000: // ADDI
-                        reg[Rd] = reg[Rs1] + Imm;
-                        pc++;
+                        reg[Rd] = reg[Rs1] + ImmI;
                         break;
                     case 0b010: // SLTI
+                        if(reg[Rs1] < ImmI) reg[Rd] = 1;
+                        else reg[Rd] = 0;
                         break;
                     case 0b011: // SLTIU
+                        if((long) reg[Rs1] < Integer.toUnsignedLong(ImmI)) reg[Rd] = 1;
+                        else reg[Rd] = 0;
                         break;
                     case 0b100: // XORI
+                        reg[Rd] = reg[Rs1] ^ ImmI;
                         break;
                     case 0b110: // ORI
+                        reg[Rd] = reg[Rs1] | ImmI;
                         break;
                     case 0b111: // ANDI
+                        reg[Rd] = reg[Rs1] & ImmI;
                         break;
                     case 0b001: // SLLI
+                        reg[Rd] = reg[Rs1] << ImmI;
                         break;
                     case 0b101: // SRLI / SRAI
+                        ShiftAmt = instHelper.getRs2(instruction);
                         switch(funct7){
                             case 0b0000000: // SRLI
+                                reg[Rd] = reg[Rs1] >>> ShiftAmt;
                                 break;
                             case 0b0100000: // SRAI
+                                reg[Rd] = reg[Rs1] >> ShiftAmt;
                                 break;
                         }
                         break;
                 }
+                pc++;
                 break;
             // FENCE / FENCE.I
             case 0b0001111:
