@@ -20,7 +20,6 @@ public class RISCVsimulator {
             System.out.println(str);
             executeInstruction(program[pc]);
             System.out.println("x"+instHelper.getRd(program[pc])+": " + reg[instHelper.getRd(program[pc])]);
-            pc++;
         }
         
         printRegisterContent(reg); 
