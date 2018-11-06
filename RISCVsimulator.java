@@ -6,11 +6,18 @@ import java.io.*;
 
 public class RISCVsimulator {
     static int pc;
-
+    static int[] reg = new int[32];
+    
     public static void main(String[] args) throws IOException {
         pc = 0;                                 // Program counter 
         String path = "addlarge.bin";           // Path of binary file 
         int[] program = getInstructions(path);  // Read all instructions from binary file
+        for(int instruction : program){
+            String str = String.format("Opcode: %02x Rd: %02x Rs1: %02x Rs2: %02x Funct3: %02x Funct7: %02x", instHelper.getOpcode(instruction), instHelper.getRd(instruction), instHelper.getRs1(instruction), instHelper.getRs2(instruction), instHelper.getFunct3(instruction), instHelper.getFunct7(instruction));
+            System.out.println(str);
+            executeInstruction(instruction);
+            System.out.println("x"+instHelper.getRd(instruction)+": " + reg[instHelper.getRd(instruction)]);
+        }
     }
      
     // Returns array of 32-bit instructions from input file given in 'path' 
@@ -87,6 +94,7 @@ public class RISCVsimulator {
             case 0b0010011:
                 switch(instHelper.getFunct3(instruction)){
                     case 0b000: // ADDI
+                        reg[instHelper.getRd(instruction)] = reg[instHelper.getRs1(instruction)] + instHelper.getImmI(instruction);
                         break;
                     case 0b010: // SLTI
                         break;
@@ -179,6 +187,7 @@ public class RISCVsimulator {
                 break;
             //AUIPC
             case 0b0010111:
+                reg[instHelper.getRd(instruction)] = instHelper.getImmU(instruction);
                 break;
 
             //J-type
