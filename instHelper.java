@@ -1,11 +1,11 @@
-/*
+/* File: instField.java
  * The following file contains functions for getting the fields of the different instruction
  * types for the RV32I Base instruction set: R-, I-, S-, B-, U- and J-type.
  *
  * Authors: Simon Amtoft Pedersen & Marc Sun Bøg
  */
 
-public class instHelper {
+public class instField {
     public static int getOpcode(int instruction) {
         return instruction & 0x7F; // Returns 7 right-most bits of instruction
     }
