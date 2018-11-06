@@ -16,8 +16,8 @@ public class RISCVsimulator {
         while (pc < program.length) {
             String str = String.format("Opcode: %02x Rd: %02x Rs1: %02x Rs2: %02x Funct3: %02x Funct7: %02x", instHelper.getOpcode(instruction), instHelper.getRd(instruction), instHelper.getRs1(instruction), instHelper.getRs2(instruction), instHelper.getFunct3(instruction), instHelper.getFunct7(instruction));
             System.out.println(str);
-            executeInstruction(instruction);
-            System.out.println("x"+instHelper.getRd(instruction)+": " + reg[instHelper.getRd(instruction)]);
+            executeInstruction(program[pc]);
+            System.out.println("x"+instHelper.getRd(program[pc])+": " + reg[instHelper.getRd(program[pc])]);
             pc++;
         }
         
