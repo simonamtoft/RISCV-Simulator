@@ -8,7 +8,6 @@ public class RISCVsimulator {
     static int pc;
 
     public static void main(String[] args) throws IOException {
-        instField inst = new instField();
         pc = 0;                                 // Program counter 
         String path = "addlarge.bin";           // Path of binary file 
         int[] program = getInstructions(path);  // Read all instructions from binary file
