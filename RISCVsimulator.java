@@ -48,14 +48,15 @@ public class RISCVsimulator {
         // Funct3 and 7 is so often used that they will be found here, regardless of being used or not
         int funct3 = instHelper.getFunct3(instruction); // Gets the funct3 field of instruction
         int funct7 = instHelper.getFunct7(instruction); // Gets the funct7 field of instruction
+        int Rd, Rs1, Rs2, ImmI, ImmU;
         
         switch(opcode){
             // R-type instructions:
             // ADD / SUB / SLL / SLT / SLTU / XOR / SRL / SRA / OR / AND
             case 0b0110011:
-                int Rd = instHelper.getRd(instruction);
-                int Rs1 = instHelper.getRs1(instruction);
-                int Rs2 = instHelper.getRs2(instruction);
+                Rd = instHelper.getRd(instruction);
+                Rs1 = instHelper.getRs1(instruction);
+                Rs2 = instHelper.getRs2(instruction);
                 switch(funct3){
                     case 0b000: // ADD / SUB
                         switch(funct7){
@@ -112,9 +113,9 @@ public class RISCVsimulator {
                 break;
             // ADDI / SLTI / SLTIU / XORI / ORI / ANDI / SLLI / SRLI / SRAI
             case 0b0010011:
-                int Rd = instHelper.getRd(instruction);
-                int Rs1 = instHelper.getRs1(instruction);
-                int Imm = instHelper.getImmI(instruction);
+                Rd = instHelper.getRd(instruction);
+                Rs1 = instHelper.getRs1(instruction);
+                Imm = instHelper.getImmI(instruction);
                 switch(funct3){
                     case 0b000: // ADDI
                         reg[Rd] = reg[Rs1] + Imm;
@@ -211,7 +212,9 @@ public class RISCVsimulator {
                 break;
             //AUIPC
             case 0b0010111:
-                reg[instHelper.getRd(instruction)] = instHelper.getImmU(instruction);
+                Rd = instHelper.getRd(instruction);
+                ImmU = instHelper.getImmU(instruction);
+                reg[Rd] = ImmU;
                 pc++;
                 break;
 
@@ -220,13 +223,6 @@ public class RISCVsimulator {
             case 0b1101111:
                 break;
 
-        }
-    }
-    
-    // Prints out the contents of all the registers x0 to x31
-    private static void printRegisterContent(int reg[]) {
-        for (int i = 0; i < reg.length; i++) {
-            System.out.println("x"+i+": " + reg[i]);
         }
     }
 }
