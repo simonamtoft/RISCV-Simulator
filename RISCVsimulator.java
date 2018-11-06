@@ -233,4 +233,11 @@ public class RISCVsimulator {
 
         }
     }
+    
+    // Prints the contents of the registers x0 to x31
+    private static void printRegisterContent(int reg[]) {
+        for (int i = 0; i < reg.length; i++) {
+            System.out.println("x"+i+": " + reg[i]);
+        }
+    }
 }
