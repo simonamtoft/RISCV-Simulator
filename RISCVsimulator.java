@@ -12,12 +12,16 @@ public class RISCVsimulator {
         pc = 0;                                 // Program counter 
         String path = "addlarge.bin";           // Path of binary file 
         int[] program = getInstructions(path);  // Read all instructions from binary file
-        for(int instruction : program){
+        
+        while (pc < program.length) {
             String str = String.format("Opcode: %02x Rd: %02x Rs1: %02x Rs2: %02x Funct3: %02x Funct7: %02x", instHelper.getOpcode(instruction), instHelper.getRd(instruction), instHelper.getRs1(instruction), instHelper.getRs2(instruction), instHelper.getFunct3(instruction), instHelper.getFunct7(instruction));
             System.out.println(str);
             executeInstruction(instruction);
             System.out.println("x"+instHelper.getRd(instruction)+": " + reg[instHelper.getRd(instruction)]);
+            pc++;
         }
+        
+        System.out.println("Exiting...");
     }
      
     // Returns array of 32-bit instructions from input file given in 'path' 
