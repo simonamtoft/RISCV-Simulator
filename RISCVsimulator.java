@@ -92,7 +92,7 @@ public class RISCVsimulator {
     }
 
     // R-type instructions: ADD / SUB / SLL / SLT / SLTU / XOR / SRL / SRA / OR / AND
-    private static void rtype(int instruction) {
+    private static void RType(int instruction) {
         // Get fields
         int funct3 = instHelper.getFunct3(instruction);
         int funct7 = instHelper.getFunct7(instruction);
@@ -139,7 +139,7 @@ public class RISCVsimulator {
     }
 
     // I-type load instructions: LB / LH / LW / LBU / LHU
-    private static void itypeLoad(int instruction) {
+    private static void ITypeLoad(int instruction) {
         int funct3 = instHelper.getFunct3(instruction); // Gets the funct3 field of instruction
         switch(funct3){
             case 0b000: // LB
@@ -157,7 +157,7 @@ public class RISCVsimulator {
     }
 
     // I-type integer instructions: ADDI / SLTI / SLTIU / XORI / ORI / ANDI / SLLI / SRLI / SRAI
-    private static void itypeInteger(int instruction) {
+    private static void ITypeInteger(int instruction) {
         // Gets commonly used fields
         int Rd = instHelper.getRd(instruction);
         int Rs1 = instHelper.getRs1(instruction);
@@ -209,7 +209,7 @@ public class RISCVsimulator {
     }
 
     // I-type fence instructions: FENCE / FENCE.I
-    private static void itypeFence(int instruction) {
+    private static void ITypeFence(int instruction) {
         int funct3 = instHelper.getFunct3(instruction);
         switch(funct3){
             case 0b000: // FENCE
@@ -221,7 +221,7 @@ public class RISCVsimulator {
     }
 
     // I-type status & call instructions: ECALL / EBREAK / CSRRW / CSRRS / CSRRC / CSRRWI / CSRRSI / CSRRCI
-    private static void itypeStatus(int instruction) {
+    private static void ITypeStatus(int instruction) {
         int ImmI;
         int funct3 = instHelper.getFunct3(instruction);
         switch(funct3){
@@ -250,7 +250,7 @@ public class RISCVsimulator {
     }
 
     // S-type instructions: SB / SH / SW
-    private static void stype(int instruction) {
+    private static void SType(int instruction) {
         int funct3 = instHelper.getFunct3(instruction); // Gets the funct3 field of instruction
         switch(funct3){
             case 0b000: // SB
@@ -263,7 +263,7 @@ public class RISCVsimulator {
     }
 
     // B-type instructions: BEQ / BNE / BLT / BGE / BLTU / BGEU
-    private static void btype(int instruction) {
+    private static void BType(int instruction) {
         int funct3 = instHelper.getFunct3(instruction); // Gets the funct3 field of instruction
         switch(funct3){
             case 0b000: // BEQ
@@ -280,7 +280,7 @@ public class RISCVsimulator {
                 break;
         }
     }
-
+    
     // Prints the contents of the registers x0 to x31
     private static void printRegisterContent(int reg[]) {
         for (int i = 0; i < reg.length; i++) {
