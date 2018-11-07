@@ -5,8 +5,8 @@
 import java.io.*;
 
 public class RISCVsimulator {
-    static int pc;
-    static int[] reg = new int[32];
+    private static int pc;
+    private static int[] reg = new int[32];
     
     public static void main(String[] args) throws IOException {
         pc = 0;                                 // Program counter 
