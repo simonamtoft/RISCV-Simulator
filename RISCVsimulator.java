@@ -76,12 +76,12 @@ public class RISCVsimulator {
 
             //U-type instructions
             case 0b0110111: //LUI
-                break;
-            case 0b0010111: //AUIPC
                 int Rd = instHelper.getRd(instruction);
                 int ImmU = instHelper.getImmU(instruction);
                 reg[Rd] = ImmU;
                 pc++;
+                break;
+            case 0b0010111: //AUIPC
                 break;
 
             //J-type instruction
@@ -229,7 +229,6 @@ public class RISCVsimulator {
                 ImmI = instHelper.getImmI(instruction);
                 switch(ImmI){
                     case 0b000000000000: // ECALL
-                        pc++;
                         break;
                     case 0b000000000001: // EBREAK
                 }
