@@ -10,7 +10,7 @@ public class RISCVsimulator {
 
     public static void main(String[] args) throws IOException {
         pc = 0;                                 // Program counter
-        String path = "addlarge.bin";           // Path of binary file
+        String path = "tests\\addlarge.bin";           // Path of binary file
         int[] program = getInstructions(path);  // Read all instructions from binary file
 
         while (pc < program.length) {
@@ -22,8 +22,7 @@ public class RISCVsimulator {
             System.out.println("x"+instHelper.getRd(program[pc-1])+": " + reg[instHelper.getRd(program[pc-1])]); //PC is incremented by executeInstruction, so we need to use the previous value
         }
 
-        printRegisterContent(reg);
-        System.out.println("Exiting...");
+        endOfProgram(reg);
     }
 
     // Returns array of 32-bit instructions from input file given in 'path'
@@ -45,33 +44,33 @@ public class RISCVsimulator {
         switch(opcode){
             // R-type instructions
             case 0b0110011: // ADD / SUB / SLL / SLT / SLTU / XOR / SRL / SRA / OR / AND
-                rtype(instruction);
+                rType(instruction);
                 break;
 
             // I-type instructions
             case 0b1100111: // JALR
                 break;
             case 0b0000011: // LB / LH / LW / LBU / LHU
-                itypeLoad(instruction);
+                iTypeLoad(instruction);
                 break;
             case 0b0010011: // ADDI / SLTI / SLTIU / XORI / ORI / ANDI / SLLI / SRLI / SRAI
-                itypeInteger(instruction);
+                iTypeInteger(instruction);
                 break;
             case 0b0001111: // FENCE / FENCE.I
-                itypeFence(instruction);
+                iTypeFence(instruction);
                 break;
             case 0b1110011: // ECALL / EBREAK / CSRRW / CSRRS / CSRRC / CSRRWI / CSRRSI / CSRRCI
-                itypeStatus(instruction);
+                iTypeStatus(instruction);
                 break;
 
             //S-type instructions
             case 0b0100011: //SB / SH / SW
-                stype(instruction);
+                sType(instruction);
                 break;
 
             //B-type instructions
             case 0b1100011: // BEQ / BNE / BLT / BGE / BLTU / BGEU
-                btype(instruction);
+                bType(instruction);
                 break;
 
             //U-type instructions
@@ -99,6 +98,7 @@ public class RISCVsimulator {
         int Rd = instHelper.getRd(instruction);
         int Rs1 = instHelper.getRs1(instruction);
         int Rs2 = instHelper.getRs2(instruction);
+        int ShiftAmt;
 
         switch(funct3){
             case 0b000: // ADD / SUB
@@ -112,27 +112,40 @@ public class RISCVsimulator {
                 }
                 break;
             case 0b001: // SLL
+                ShiftAmt = reg[Rs2] & 0x1F; // Lower 5 bits of rs2
+                reg[Rd] = reg[Rs1] << ShiftAmt;
                 break;
             case 0b010: // SLT
+                if (reg[Rs1] < reg[Rs2])
+                    reg[Rd] = 1;
+                else
+                    reg[Rd] = 0;
                 break;
             case 0b011: // SLTU
+                if (Integer.toUnsignedLong(reg[Rs1]) < Integer.toUnsignedLong(reg[Rs2]))
+                    reg[Rd] = 1;
+                else
+                    reg[Rd] = 0;
                 break;
             case 0b100: // XOR
-                reg[Rd] = Rs1 ^ Rs2;
+                reg[Rd] = reg[Rs1] ^ reg[Rs2];
                 break;
             case 0b101: // SRL / SRA
+                ShiftAmt = reg[Rs2] & 0x1F; // Lower 5 bits of rs2
                 switch(funct7){
                     case 0b0000000: // SRL
+                        reg[Rd] = reg[Rs1] >>> ShiftAmt;
                         break;
                     case 0b0100000: // SRA
+                        reg[Rd] = reg[Rs1] >> ShiftAmt;
                         break;
                 }
                 break;
             case 0b110: // OR
-                reg[Rd] = Rs1 | Rs2;
+                reg[Rd] = reg[Rs1] | reg[Rs2];
                 break;
             case 0b111: // AND
-                reg[Rd] = Rs1 & Rs2;
+                reg[Rd] = reg[Rs1] & reg[Rs2];
                 break;
         }
         pc++;
@@ -175,7 +188,8 @@ public class RISCVsimulator {
                     reg[Rd] = 0;
                 break;
             case 0b011: // SLTIU
-                if((long) reg[Rs1] < Integer.toUnsignedLong(ImmI))
+                // REG RS1 SKAL VÆRE UNSIGNED???
+                if(Integer.toUnsignedLong(reg[Rs1]) < Integer.toUnsignedLong(ImmI))
                     reg[Rd] = 1;
                 else
                     reg[Rd] = 0;
@@ -193,7 +207,7 @@ public class RISCVsimulator {
                 reg[Rd] = reg[Rs1] << ImmI;
                 break;
             case 0b101: // SRLI / SRAI
-                int ShiftAmt = instHelper.getRs2(instruction);
+                int ShiftAmt = ImmI & 0x1F;
                 int funct7 = instHelper.getFunct7(instruction);
                 switch(funct7){
                     case 0b0000000: // SRLI
@@ -280,11 +294,24 @@ public class RISCVsimulator {
                 break;
         }
     }
-    
+
     // Prints the contents of the registers x0 to x31
     private static void printRegisterContent(int reg[]) {
         for (int i = 0; i < reg.length; i++) {
-            System.out.println("x"+i+": " + reg[i]);
+            if (reg[i] != 0)
+                System.out.println("x"+i+": " + reg[i]);
         }
+    }
+
+    // Outputs registers x0 to x31 in file "output.bin", and prints them in console.
+    private static void endOfProgram(int[] reg) throws IOException{
+        DataOutputStream dos = new DataOutputStream(new FileOutputStream("output.bin"));
+        for (int i = 0; i < reg.length; i++) {
+            dos.writeInt(reg[i]);
+        }
+        dos.close();
+
+        printRegisterContent(reg);
+        System.out.println("Exiting...");
     }
 }
