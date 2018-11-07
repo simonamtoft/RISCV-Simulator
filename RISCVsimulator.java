@@ -98,7 +98,6 @@ public class RISCVsimulator {
         int Rd = instHelper.getRd(instruction);
         int Rs1 = instHelper.getRs1(instruction);
         int Rs2 = instHelper.getRs2(instruction);
-        int ShiftAmt;
 
         switch(funct3){
             case 0b000: // ADD / SUB
