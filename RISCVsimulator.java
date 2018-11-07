@@ -6,12 +6,14 @@ import java.io.*;
 
 public class RISCVsimulator {
     private static int pc;
-    private static int[] reg = new int[32];
+    private static int[] program;
+    private static int[] reg;
 
     public static void main(String[] args) throws IOException {
-        pc = 0;                                 // Program counter
         String path = "tests\\addlarge.bin";           // Path of binary file
-        int[] program = getInstructions(path);  // Read all instructions from binary file
+        pc = 0;                                 // Program counter
+        reg = new int[32];
+        program = getInstructions(path);  // Read all instructions from binary file
 
         while (pc < program.length) {
             String str = String.format("Opcode: %02x Rd: %02x Rs1: %02x Rs2: %02x Funct3: %02x Funct7: %02x",
@@ -236,8 +238,10 @@ public class RISCVsimulator {
                 ImmI = instHelper.getImmI(instruction);
                 switch(ImmI){
                     case 0b000000000000: // ECALL
-                        break;
+                        if(reg[10] == 10) pc = program.length; //Sets the program counter such that it will break the execution loop
+                        return;
                     case 0b000000000001: // EBREAK
+                        break;
                 }
                 break;
             case 0b001: // CSRRW
@@ -304,7 +308,7 @@ public class RISCVsimulator {
         int ImmU = instHelper.getImmU(instruction);
         switch(opcode){
             case 0b0010111: // AUIPC
-                reg[Rd] = pc;
+                reg[Rd] = pc*4; // Compensate for counting in 4 byte words
             case 0b0110111: // LUI
                 reg[Rd] += ImmU;
                 break;
