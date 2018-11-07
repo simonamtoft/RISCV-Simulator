@@ -304,8 +304,8 @@ public class RISCVsimulator {
     // Outputs registers x0 to x31 in file "output.bin", and prints them in console.
     private static void endOfProgram(int[] reg) throws IOException{
         DataOutputStream dos = new DataOutputStream(new FileOutputStream("output.bin"));
-        for (int i = 0; i < reg.length; i++) {
-            dos.writeInt(reg[i]);
+        for (int val : reg) {
+            dos.writeInt(val);
         }
         dos.close();
 
