@@ -303,9 +303,9 @@ public class RISCVsimulator {
         int Rd = instHelper.getRd(instruction);
         int ImmU = instHelper.getImmU(instruction);
         switch(opcode){
-            case 0b0110111:
+            case 0b0110111: // LUI
                 reg[Rd] = ImmU;
-            case 0b0010111:
+            case 0b0010111: // AUIPC
                 reg[Rd] += pc;
                 break;
         }
