@@ -271,19 +271,29 @@ public class RISCVsimulator {
 
     // B-type instructions: BEQ / BNE / BLT / BGE / BLTU / BGEU
     private static void bType(int instruction) {
-        int funct3 = instHelper.getFunct3(instruction); // Gets the funct3 field of instruction
+        int funct3 = instHelper.getFunct3(instruction);
+        int Rs1 = instHelper.getRs1(instruction);
+        int Rs2 = instHelper.getRs2(instruction);
+        int ImmB = instHelper.getImmB(instruction) / 4; //We're counting in words instead of bytes
+
         switch(funct3){
             case 0b000: // BEQ
+                pc += (reg[Rs1] == reg[Rs2]) ? ImmB : 1;
                 break;
             case 0b001: // BNE
+                pc += (reg[Rs1] != reg[Rs2]) ? ImmB : 1;
                 break;
             case 0b100: // BLT
+                pc += (reg[Rs1] < reg[Rs2]) ? ImmB : 1;
                 break;
             case 0b101: // BGE
+                pc += (reg[Rs1] >= reg[Rs2]) ? ImmB : 1;
                 break;
             case 0b110: //BLTU
+                pc += (Integer.toUnsignedLong(reg[Rs1]) < Integer.toUnsignedLong(reg[Rs2])) ? ImmB : 1;
                 break;
             case 0b111: //BLGEU
+                pc += (Integer.toUnsignedLong(reg[Rs1]) >= Integer.toUnsignedLong(reg[Rs2])) ? ImmB : 1;
                 break;
         }
     }

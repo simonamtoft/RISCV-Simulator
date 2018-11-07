@@ -39,14 +39,7 @@ class instHelper {
     }
 
     static int getImmB (int instruction) {
-        //return (((((instr >> 20) & 0xFFFFFFE0) | ((instr >>> 7) & 0x0000001F)) & 0xFFFFF7FE) | ((   (((instr >> 20) & 0xFFFFFFE0) | ((instr >>> 7) & 0x0000001F)) & 0x00000001) << 11));
-        int b11 = (instruction>>7) & 0x1;       // 11'th bit of immediate (7th bit of instruction)
-        int b1to4 = (instruction>>8) & 0xF;     // Bits 1 to 4 of immediate (8 to 11 of instruction)
-        int b5to10 = (instruction>>25) & 0x1F;  // Bits 5 to 10 of immediate (25 to 30 of instruction)
-        int b12 = (instruction>>31) & 0x1;      // Bit 12 of immediate (MSB of instruction)
-
-        // Returns bits in the order: imm[12|10:5|4:1|11]
-        return b11 << 11 | b1to4 << 1 | b5to10 << 5 | b12 << 12;
+        return (((((instr >> 20) & 0xFFFFFFE0) | ((instr >>> 7) & 0x0000001F)) & 0xFFFFF7FE) | ((   (((instr >> 20) & 0xFFFFFFE0) | ((instr >>> 7) & 0x0000001F)) & 0x00000001) << 11));
     }
 
     static int getImmU(int instruction){
