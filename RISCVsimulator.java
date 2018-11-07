@@ -112,8 +112,7 @@ public class RISCVsimulator {
                 }
                 break;
             case 0b001: // SLL
-                ShiftAmt = reg[Rs2] & 0x1F; // Lower 5 bits of rs2
-                reg[Rd] = reg[Rs1] << ShiftAmt;
+                reg[Rd] = reg[Rs1] << reg[Rs2];
                 break;
             case 0b010: // SLT
                 if (reg[Rs1] < reg[Rs2])
@@ -131,13 +130,12 @@ public class RISCVsimulator {
                 reg[Rd] = reg[Rs1] ^ reg[Rs2];
                 break;
             case 0b101: // SRL / SRA
-                ShiftAmt = reg[Rs2] & 0x1F; // Lower 5 bits of rs2
                 switch(funct7){
                     case 0b0000000: // SRL
-                        reg[Rd] = reg[Rs1] >>> ShiftAmt;
+                        reg[Rd] = reg[Rs1] >>> reg[Rs2];
                         break;
                     case 0b0100000: // SRA
-                        reg[Rd] = reg[Rs1] >> ShiftAmt;
+                        reg[Rd] = reg[Rs1] >> reg[Rs2];
                         break;
                 }
                 break;
