@@ -233,6 +233,8 @@ public class RISCVsimulator {
                 break;
 
         }
+        // x0 must always be 0
+        reg[0] = 0;
     }
     
     // Prints the contents of the registers x0 to x31
