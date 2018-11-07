@@ -46,7 +46,11 @@ public class RISCVsimulator {
             case 0b0110011: // ADD / SUB / SLL / SLT / SLTU / XOR / SRL / SRA / OR / AND
                 rType(instruction);
                 break;
-
+                
+            //J-type instruction
+            case 0b1101111: //JAL
+                break;
+                
             // I-type instructions
             case 0b1100111: // JALR
                 break;
@@ -75,17 +79,9 @@ public class RISCVsimulator {
 
             //U-type instructions
             case 0b0110111: //LUI
-                int Rd = instHelper.getRd(instruction);
-                int ImmU = instHelper.getImmU(instruction);
-                reg[Rd] = ImmU;
-                pc++;
-                break;
             case 0b0010111: //AUIPC
-                break;
-
-            //J-type instruction
-            case 0b1101111: //JAL
-                break;
+                uType(instruction, opcode);
+                break; 
         }
         reg[0] = 0; // x0 must always be 0
     }
@@ -291,7 +287,22 @@ public class RISCVsimulator {
                 break;
         }
     }
-
+    
+    // U-type instructions: LUI / AUIPC
+    private static void uType(int instruction, int opcode){
+        int Rd = instHelper.getRd(instruction);
+        int ImmU = instHelper.getImmU(instruction);
+        switch(opcode){
+            case 0b0110111:
+                reg[Rd] = ImmU;
+                break;
+            case 0b0010111:
+                reg[Rd] = ImmU + pc;
+                break;
+        }
+        pc++;
+    }
+    
     // Prints the contents of the registers x0 to x31
     private static void printRegisterContent(int reg[]) {
         for (int i = 0; i < reg.length; i++) {
