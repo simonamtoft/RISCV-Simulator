@@ -295,9 +295,8 @@ public class RISCVsimulator {
         switch(opcode){
             case 0b0110111:
                 reg[Rd] = ImmU;
-                break;
             case 0b0010111:
-                reg[Rd] = ImmU + pc;
+                reg[Rd] += pc;
                 break;
         }
         pc++;
