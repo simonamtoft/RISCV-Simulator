@@ -64,7 +64,6 @@ public class RISCVsimulator {
                                 reg[Rd] = reg[Rs1] - reg[Rs2];
                                 break;
                         }
-                        pc++;
                         break;
                     case 0b001: // SLL
                         break;
@@ -73,6 +72,7 @@ public class RISCVsimulator {
                     case 0b011: // SLTU
                         break;
                     case 0b100: // XOR
+                        reg[Rd] = Rs1 ^ Rs2;
                         break;
                     case 0b101: // SRL / SRA
                         switch(funct7){
@@ -83,10 +83,13 @@ public class RISCVsimulator {
                         }
                         break;
                     case 0b110: // OR
+                        reg[Rd] = Rs1 | Rs2;
                         break;
                     case 0b111: // AND
+                        reg[Rd] = Rs1 & Rs2;
                         break;
                 }
+                pc++;
                 break;
             // I-type instructions: 
             // JALR
