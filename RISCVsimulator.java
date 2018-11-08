@@ -50,14 +50,18 @@ public class RISCVsimulator {
                 
             //J-type instruction
             case 0b1101111: //JAL
-                int Rd = instHelpet.getRd(instruction);
+                int Rd = instHelper.getRd(instruction);
                 reg[1] = pc;    // x1 = return address
-                pc += ;       
-                reg[Rd] = pc+1; // Next instruction
+                pc += instHelper.getImmJ(instruction);       
+                reg[Rd] = pc+1; // Address of next instruction
                 break;
                 
             // I-type instructions
             case 0b1100111: // JALR
+                int Rs1 = instHelper.getRs1(instruction);
+                int ImmI = instHelper.getImmI(instrction);
+                pc += (reg[Rs1] + ImmI) & 0xFFFFFFFE; // Adds I-immediate and rs1 to pc, where LSB = 0
+                reg[Rd] = pc + 1; 
                 break;
             case 0b0000011: // LB / LH / LW / LBU / LHU
                 iTypeLoad(instruction);
