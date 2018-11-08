@@ -10,7 +10,9 @@ public class RISCVsimulator {
     private static int[] reg;
 
     public static void main(String[] args) throws IOException {
-        String path = "tests\\addlarge.bin";    // Path of binary file
+        String test = "add_large";
+        String dir = "tests\\";
+        String path = dir+test+".bin";          // Path of binary file
         pc = 0;                                 // Program counter
         reg = new int[32];                      // Define register to be array of 32 elements (x0 to x31)
         program = getInstructions(path);        // Read all instructions from binary file
@@ -25,6 +27,7 @@ public class RISCVsimulator {
             System.out.println("x"+instHelper.getRd(program[prevPc])+": " + reg[instHelper.getRd(program[prevPc])]);
         }
         endOfProgram(reg);
+        compareResults(dir+test+".res", "./output.bin");
     }
 
     // Returns array of 32-bit instructions from input file given in 'path'
@@ -97,7 +100,7 @@ public class RISCVsimulator {
             case 0b1101111: //JAL
                 Imm = instHelper.getImmJ(instruction);
                 reg[Rd] = (pc+1)*4; // Store address of next instruction in bytes
-                pc += Imm;
+                pc += Imm/4;
                 return;
             case 0b1100111: //JALR
                 Rs = instHelper.getRs1(instruction);
@@ -365,11 +368,35 @@ public class RISCVsimulator {
     private static void endOfProgram(int[] reg) throws IOException{
         DataOutputStream dos = new DataOutputStream(new FileOutputStream("output.bin"));
         for (int val : reg) {
-            dos.writeInt(val);
+            dos.writeInt(Integer.reverseBytes(val));
         }
         dos.close();
 
         printRegisterContent(reg);
         System.out.println("Exiting...");
+    }
+                                    
+    private static void compareResults(String path1, String path2) throws IOException {
+        File file1 = new File(path1);
+        File file2 = new File(path2);
+        int[] res1 = new int[(int) file1.length()/4];
+        int[] res2 = new int[(int) file2.length()/4];
+        DataInputStream dis = new DataInputStream(new FileInputStream(file1));
+        for(int i = 0; i < res1.length; i++){
+            res1[i] = Integer.reverseBytes(dis.readInt());
+        }
+        dis.close();
+
+        dis = new DataInputStream(new FileInputStream(file2));
+        for(int i = 0; i < res2.length; i++){
+            res2[i] = Integer.reverseBytes(dis.readInt());
+        }
+        dis.close();
+        System.out.println("Same length: " + (res1.length==res2.length));
+        if((res1.length==res2.length)){
+            for(int i = 0; i < res2.length; i++){
+                System.out.println(res1[i]+" "+res2[i]);
+            }
+        }
     }
 }
