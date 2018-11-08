@@ -16,12 +16,13 @@ public class RISCVsimulator {
         program = getInstructions(path);        // Read all instructions from binary file
 
         while (pc < program.length) {
+            int prevPc = pc;
             String str = String.format("Opcode: %02x Rd: %02x Rs1: %02x Rs2: %02x Funct3: %02x Funct7: %02x",
                     instHelper.getOpcode(program[pc]), instHelper.getRd(program[pc]), instHelper.getRs1(program[pc]),
                     instHelper.getRs2(program[pc]), instHelper.getFunct3(program[pc]), instHelper.getFunct7(program[pc]));
             System.out.println(str);
             executeInstruction(program[pc]);
-            System.out.println("x"+instHelper.getRd(program[pc-1])+": " + reg[instHelper.getRd(program[pc-1])]); //PC is incremented by executeInstruction, so we need to use the previous value
+            System.out.println("x"+instHelper.getRd(program[prevPc])+": " + reg[instHelper.getRd(program[prevPc])]);
         }
         endOfProgram(reg);
     }
