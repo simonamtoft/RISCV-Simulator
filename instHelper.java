@@ -31,7 +31,7 @@ class instHelper {
     }
 
     static int getImmI (int inst) {
-        return (inst >>> 20); // Returns bits 31 to 20 (sign-extended to 32-bits)
+        return (inst >> 20); // Returns bits 31 to 20 (sign-extended to 32-bits)
     }
 
     static int getImmS (int inst) {
@@ -39,7 +39,10 @@ class instHelper {
     }
 
     static int getImmB (int inst) {
-        return (((((inst >>> 20) & 0xFFFFFFE0) | ((instr >>> 7) & 0x0000001F)) & 0xFFFFF7FE) | (((((instr >>> 20) & 0xFFFFFFE0) | ((instr >>> 7) & 0x0000001F)) & 0x00000001) << 11));
+        return (((((inst >> 20) & 0xFFFFFFE0) | 
+                  ((inst >>> 7) & 0x0000001F)) & 0xFFFFF7FE) | 
+                (((((inst >> 20) & 0xFFFFFFE0) | 
+                   ((inst >>> 7) & 0x0000001F)) & 0x00000001) << 11));
     }
 
     static int getImmU(int inst){
@@ -47,14 +50,7 @@ class instHelper {
     }
 
     static int getImmJ(int inst) {
-        //return (((inst >> 20) & 0xFFF007FE) | ((inst >>> 9) & 0x00000800) | (inst & 0x000FF000));
-        int b12to19 = (inst>>>12) & 0xFF; // Bits 12 to 19 of immediate (12 to 19 of instruction)
-        int b11 = (inst>>>20) & 0x1;      // Bit 11 of immediate (20th bit of instruction)
-        int b1to10 = (inst>>>21) & 0x3FF; // Bit 1 to 10 of immediate (21 to 30 of instruction)
-        int b20 = (inst>>>31);            // Bit 20 of immediate (MSB of instruction)
-
-        // Returns bits in the order: imm[20|10:1|11|19:12]
-        return (b20 << 20 | b12to19 << 12 | b11 << 11 | b1to10 << 1);
+        return (((inst >> 20) & 0xFFF007FE) | ((inst >>> 9) & 0x00000800) | (inst & 0x000FF000));
     }
     static int getImmCSR(int inst){
         return (inst >>> 20); //Logical shift
