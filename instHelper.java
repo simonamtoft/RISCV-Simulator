@@ -39,10 +39,12 @@ class instHelper {
     }
 
     static int getImmB (int inst) {
-        return (((((inst >> 20) & 0xFFFFFFE0) | 
-                  ((inst >>> 7) & 0x0000001F)) & 0xFFFFF7FE) | 
-                (((((inst >> 20) & 0xFFFFFFE0) | 
-                   ((inst >>> 7) & 0x0000001F)) & 0x00000001) << 11));
+        int b1 = (inst >> 20) & 0xFFFFFFE0; 
+        int b2 = (inst >>> 7) & 0x0000001F; 
+        int b3 = (inst >> 20) & 0xFFFFFFE0; 
+        int b4 = (((inst >>> 7) & 0x0000001F) & 0x00000001) << 11
+        
+        return b1 | b2 | b3 | b4; 
     }
 
     static int getImmU(int inst){
