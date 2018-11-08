@@ -10,10 +10,10 @@ public class RISCVsimulator {
     private static int[] reg;
 
     public static void main(String[] args) throws IOException {
-        String path = "tests\\addlarge.bin";           // Path of binary file
+        String path = "tests\\addlarge.bin";    // Path of binary file
         pc = 0;                                 // Program counter
-        reg = new int[32];
-        program = getInstructions(path);  // Read all instructions from binary file
+        reg = new int[32];                      // Define register to be array of 32 elements (x0 to x31)
+        program = getInstructions(path);        // Read all instructions from binary file
 
         while (pc < program.length) {
             String str = String.format("Opcode: %02x Rd: %02x Rs1: %02x Rs2: %02x Funct3: %02x Funct7: %02x",
@@ -23,7 +23,6 @@ public class RISCVsimulator {
             executeInstruction(program[pc]);
             System.out.println("x"+instHelper.getRd(program[pc-1])+": " + reg[instHelper.getRd(program[pc-1])]); //PC is incremented by executeInstruction, so we need to use the previous value
         }
-
         endOfProgram(reg);
     }
 
@@ -51,6 +50,10 @@ public class RISCVsimulator {
                 
             //J-type instruction
             case 0b1101111: //JAL
+                int Rd = instHelpet.getRd(instruction);
+                reg[1] = pc;    // x1 = return address
+                pc += ;       
+                reg[Rd] = pc+1; // Next instruction
                 break;
                 
             // I-type instructions
@@ -239,9 +242,19 @@ public class RISCVsimulator {
                 switch(ImmI){
                     case 0b000000000000: // ECALL
                         switch (reg[10) {
-                            case 10: 
+                            case 1:     // print_int
+                            case 4:     // print_string
+                            case 9:     // sbrk
+                                // not sure if we can do this?
+                            case 10:    // exit
                                pc = program.length; // Sets program counter to end of program, to program loop
                                return;              // Exits 'iTypeStatus' function and returns to loop. 
+                            case 11:    // print_character
+                                char a1 = (char) reg[11];
+                            case 17:    // exit2
+                                pc = program.length;
+                                System.out.println("a1 = " reg[11]); // Prints a1 (should be return?)
+                                return;
                             default: 
                                 System.out.println("ECALL" + reg[10] + " not implemented");
                                 break;
