@@ -238,8 +238,14 @@ public class RISCVsimulator {
                 ImmI = instHelper.getImmI(instruction);
                 switch(ImmI){
                     case 0b000000000000: // ECALL
-                        if(reg[10] == 10) pc = program.length; //Sets the program counter such that it will break the execution loop
-                        return;
+                        switch (reg[10) {
+                            case 10: 
+                               pc = program.length; // Sets program counter to end of program, to program loop
+                               return;              // Exits 'iTypeStatus' function and returns to loop. 
+                            default: 
+                                System.out.println("ECALL" + reg[10] + " not implemented");
+                                break;
+                        }
                     case 0b000000000001: // EBREAK
                         break;
                 }
