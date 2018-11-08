@@ -48,20 +48,14 @@ public class RISCVsimulator {
                 rType(instruction);
                 break;
                 
-            //J-type instruction
+            // J-type instruction
             case 0b1101111: //JAL
-                int Rd = instHelper.getRd(instruction);
-                reg[1] = pc;    // x1 = return address
-                pc += instHelper.getImmJ(instruction);       
-                reg[Rd] = pc+1; // Address of next instruction
+                jumpTypes(instruction, opcode);
                 break;
-                
+
             // I-type instructions
             case 0b1100111: // JALR
-                int Rs1 = instHelper.getRs1(instruction);
-                int ImmI = instHelper.getImmI(instrction);
-                pc += (reg[Rs1] + ImmI) & 0xFFFFFFFE; // Adds I-immediate and rs1 to pc, where LSB = 0
-                reg[Rd] = pc + 1; 
+                jumpTypes(instruction, opcode);
                 break;
             case 0b0000011: // LB / LH / LW / LBU / LHU
                 iTypeLoad(instruction);
@@ -94,7 +88,26 @@ public class RISCVsimulator {
         }
         reg[0] = 0; // x0 must always be 0
     }
-
+    
+    // JAL and JALR
+    private static void jumpTypes(int instruction, int opcode){
+        int Rd = instHelper.getRd(instruction), Rs, Imm;
+        switch(opcode){
+            case 0b1101111: //JAL
+                Imm = instHelper.getImmJ(instruction);
+                reg[Rd] = (pc+1)*4; // Store address of next instruction in bytes
+                pc += Imm;
+                return;
+            case 0b1100111: //JALR
+                Rs = instHelper.getRs1(instruction);
+                Imm = instHelper.getImmI(instruction);
+                reg[Rd] = (pc+1)*4;
+                pc = ((reg[Rs] + Imm) & 0xFFFFFFFE)/4;
+                return;
+        }
+        pc++;
+    }
+    
     // R-type instructions: ADD / SUB / SLL / SLT / SLTU / XOR / SRL / SRA / OR / AND
     private static void rType(int instruction) {
         // Get fields
