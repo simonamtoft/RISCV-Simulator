@@ -2,29 +2,31 @@
  * Authors: Simon Amtoft Pedersen & Marc Sun Bøg
  * The following file simulates the RISC-V instructions set from a binary input file
  */
+
 import java.io.*;
 
 public class RISCVsimulator {
-    private static int pc;
-    private static int[] program;
-    private static int[] reg;
-    private static int[] memory = new int[128*1000/4]; // 128KB of memory allocated.
+    private static int pc = 0;                          // Program counter
+    private static int[] program;                       // Array of program instructions
+    private static int[] reg = new int[32];             // Define register to be array of 32 elements (x0 to x31)
+    private static int[] memory = new int[128*1000/4];  // 128KB of memory allocated.
 
     public static void main(String[] args) throws IOException {
-        String test = "add_large";              // Name of test file
+        String test = "addlarge";              // Name of test file
         String dir = "tests\\";                 // Directory
         String path = dir+test+".bin";          // Path of binary file
-        pc = 0;                                 // Program counter
-        reg = new int[32];                      // Define register to be array of 32 elements (x0 to x31)
         program = getInstructions(path);        // Read all instructions from binary file
-        reg[2] = 128*1000-4;             // Initialize sp to last word in memory.
+        reg[2] = 128*1000-4;                    // Initialize sp to last word in memory.
+
+
+        System.out.println("Machine code \t Basic code");
+
         while (pc < program.length) {
+            System.out.print(String.format("0x%08X",program[pc]) + "\t\t");
             executeInstruction(program[pc]);
-            // draw things 
         }
-        System.out.println("---");
+
         endOfProgram(reg);
-        compareResults(dir+test+".res", "./output.bin");
     }
 
     // Returns array of 32-bit instructions from input file given in 'path'
@@ -48,12 +50,12 @@ public class RISCVsimulator {
             case 0b0110011: // ADD / SUB / SLL / SLT / SLTU / XOR / SRL / SRA / OR / AND
                 rType(instruction);
                 break;
-                
+
             // J-type instruction
             case 0b1101111: //JAL
                 jumpTypes(instruction, opcode);
 
-            // I-type instructions
+                // I-type instructions
             case 0b1100111: // JALR
                 jumpTypes(instruction, opcode);
                 break;
@@ -84,11 +86,11 @@ public class RISCVsimulator {
             case 0b0110111: //LUI
             case 0b0010111: //AUIPC
                 uType(instruction, opcode);
-                break; 
+                break;
         }
         reg[0] = 0; // x0 must always be 0
     }
-    
+
     // JAL and JALR
     private static void jumpTypes(int instruction, int opcode){
         int Rd = instHelper.getRd(instruction), Rs = 0, Imm = 0;
@@ -120,7 +122,7 @@ public class RISCVsimulator {
         int Rd = instHelper.getRd(instruction);
         int Rs1 = instHelper.getRs1(instruction);
         int Rs2 = instHelper.getRs2(instruction);
-        String type;
+        String type = "Unrecognized Opcode";
         switch(funct3){
             case 0b000: // ADD / SUB
                 switch(funct7){
@@ -176,9 +178,6 @@ public class RISCVsimulator {
                 type = "AND";
                 reg[Rd] = reg[Rs1] & reg[Rs2];
                 break;
-            default:
-                type = "Unrecognized Opcode";
-                break;
         }
         System.out.println(String.format("%s x%02d x%02d x%02d", type, Rd, Rs1, Rs2));
         pc++;
@@ -192,7 +191,7 @@ public class RISCVsimulator {
         int ImmI = instHelper.getImmI(instruction);
         int addr = reg[Rs1] + ImmI; // Byte address
         String type;
-       
+
         switch(funct3){
             // This assumes properly aligned addresses in all scenarios. LH / LW wont work properly if misaligned.
             case 0b000: // LB
@@ -435,48 +434,22 @@ public class RISCVsimulator {
         pc++;
     }
 
-    
-    // Prints the contents of the registers x0 to x31
-    private static void printRegisterContent(int reg[]) {
-        for (int i = 0; i < reg.length; i++) {
-            if (reg[i] != 0)
-                System.out.println("x"+i+": " + reg[i]);
-        }
-    }
 
     // Outputs registers x0 to x31 in file "output.bin", and prints them in console.
     private static void endOfProgram(int[] reg) throws IOException{
+
+        // Output to binary file
         DataOutputStream dos = new DataOutputStream(new FileOutputStream("output.bin"));
         for (int val : reg) {
             dos.writeInt(Integer.reverseBytes(val));
         }
         dos.close();
 
-        printRegisterContent(reg);
-        System.out.println("Exiting...");
-    }
-                                    
-    private static void compareResults(String path1, String path2) throws IOException {
-        File file1 = new File(path1);
-        File file2 = new File(path2);
-        int[] res1 = new int[(int) file1.length()/4];
-        int[] res2 = new int[(int) file2.length()/4];
-        DataInputStream dis = new DataInputStream(new FileInputStream(file1));
-        for(int i = 0; i < res1.length; i++){
-            res1[i] = Integer.reverseBytes(dis.readInt());
-        }
-        dis.close();
-
-        dis = new DataInputStream(new FileInputStream(file2));
-        for(int i = 0; i < res2.length; i++){
-            res2[i] = Integer.reverseBytes(dis.readInt());
-        }
-        dis.close();
-        System.out.println("Same length: " + (res1.length==res2.length));
-        if((res1.length==res2.length)){
-            for(int i = 0; i < res2.length; i++){
-                System.out.println(res1[i]+" "+res2[i]);
-            }
+        // Print out register content of x0 to x31
+        System.out.println("\nRegister contents:");
+        for (int i = 0; i < reg.length; i++) {
+            if (reg[i] != 0)
+                System.out.println("x"+i+": " + reg[i]);
         }
     }
 }
