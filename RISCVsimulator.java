@@ -8,19 +8,19 @@ public class RISCVsimulator {
     private static int pc;
     private static int[] program;
     private static int[] reg;
-    private static int[] memory;
+    private static int[] memory = new int[128*1000/4]; // 128KB of memory allocated.
 
     public static void main(String[] args) throws IOException {
-        String test = "add_large";
-        String dir = "tests\\";
+        String test = "add_large";              // Name of test file
+        String dir = "tests\\";                 // Directory
         String path = dir+test+".bin";          // Path of binary file
         pc = 0;                                 // Program counter
         reg = new int[32];                      // Define register to be array of 32 elements (x0 to x31)
         program = getInstructions(path);        // Read all instructions from binary file
-        memory = new int[128*1000*1000/4];      // 128MB of memory allocated.
-        reg[2] = 128*1000*1000 - 4;             // Initialize sp to last word in memory.
+        reg[2] = 128*1000-4;             // Initialize sp to last word in memory.
         while (pc < program.length) {
             executeInstruction(program[pc]);
+            // draw things 
         }
         System.out.println("---");
         endOfProgram(reg);
@@ -186,12 +186,13 @@ public class RISCVsimulator {
 
     // I-type load instructions: LB / LH / LW / LBU / LHU
     private static void iTypeLoad(int instruction) {
-        int funct3 = instHelper.getFunct3(instruction); // Gets the funct3 field of instruction
+        int funct3 = instHelper.getFunct3(instruction);
         int Rd = instHelper.getRd(instruction);
         int Rs1 = instHelper.getRs1(instruction);
         int ImmI = instHelper.getImmI(instruction);
-        int addr = reg[Rs1] + ImmI;
-        String type = "Unrecognized Opcode";
+        int addr = reg[Rs1] + ImmI; // Byte address
+        String type;
+       
         switch(funct3){
             // This assumes properly aligned addresses in all scenarios. LH / LW wont work properly if misaligned.
             case 0b000: // LB
@@ -214,6 +215,9 @@ public class RISCVsimulator {
             case 0b101: // LHU
                 type = "LHU";
                 reg[Rd] = (memory[addr >> 2] >> ((addr & 0x3) << 3)) & 0xFFFF;
+                break;
+            default:
+                type = "Unrecognized Opcode";
                 break;
         }
         System.out.println(String.format("%s x%d %d(x%d)", type, Rd, ImmI, Rs1));
