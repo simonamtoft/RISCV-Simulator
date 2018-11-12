@@ -120,7 +120,7 @@ public class RISCVsimulator {
         int Rd = instHelper.getRd(instruction);
         int Rs1 = instHelper.getRs1(instruction);
         int Rs2 = instHelper.getRs2(instruction);
-        String type = "Unrecognized Opcode";
+        String type;
         switch(funct3){
             case 0b000: // ADD / SUB
                 switch(funct7){
@@ -175,6 +175,9 @@ public class RISCVsimulator {
             case 0b111: // AND
                 type = "AND";
                 reg[Rd] = reg[Rs1] & reg[Rs2];
+                break;
+            default:
+                type = "Unrecognized Opcode";
                 break;
         }
         System.out.println(String.format("%s x%02d x%02d x%02d", type, Rd, Rs1, Rs2));
