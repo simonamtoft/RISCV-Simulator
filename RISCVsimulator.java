@@ -52,7 +52,6 @@ public class RISCVsimulator {
             // J-type instruction
             case 0b1101111: //JAL
                 jumpTypes(instruction, opcode);
-                break;
 
             // I-type instructions
             case 0b1100111: // JALR
@@ -100,14 +99,14 @@ public class RISCVsimulator {
                 Imm = instHelper.getImmJ(instruction);
                 reg[Rd] = (pc+1)*4; // Store address of next instruction in bytes
                 pc += Imm/4;
-                return;
+                break;
             case 0b1100111: //JALR
                 type = "JALR";
                 Rs = instHelper.getRs1(instruction);
                 Imm = instHelper.getImmI(instruction);
                 reg[Rd] = (pc+1)*4;
                 pc = ((reg[Rs] + Imm) & 0xFFFFFFFE)/4;
-                return;
+                break;
         }
         System.out.println(String.format("%s x%02d 0x%x", type, Rd, Imm));
         pc++;
