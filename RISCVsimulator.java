@@ -5,19 +5,21 @@
 
 import java.io.*;
 
-public class RISCVsimulator {
+public class RISCVsimulator extends guiHelper {
     private static int pc = 0;                          // Program counter
     private static int[] program;                       // Array of program instructions
     private static int[] reg = new int[32];             // Define register to be array of 32 elements (x0 to x31)
     private static int[] memory = new int[128*1000/4];  // 128KB of memory allocated.
-
+    
+    static guiHelper gui = new guiHelper();
+    
     public static void main(String[] args) throws IOException {
-        String test = "addlarge";              // Name of test file
-        String dir = "tests\\";                 // Directory
-        String path = dir+test+".bin";          // Path of binary file
-        program = getInstructions(path);        // Read all instructions from binary file
-        reg[2] = 128*1000-4;                    // Initialize sp to last word in memory.
-
+        guiHelper.launch(args);
+        String test = "addlarge";           // Name of test file
+        String dir = "tests\\";             // Directory
+        String path = dir+test+".bin";      // Path of binary file
+        program = getInstructions(path);    // Read all instructions from binary file
+        reg[2] = 128*1000-4;                // Initialize sp to last word in memory.
 
         System.out.println("Machine code \t Basic code");
 
@@ -179,6 +181,10 @@ public class RISCVsimulator {
                 reg[Rd] = reg[Rs1] & reg[Rs2];
                 break;
         }
+        
+        // replacing node in gui table here??
+        // gui.replaceNode(Rd,String.format("%s",reg[Rd]));
+        
         System.out.println(String.format("%s x%02d x%02d x%02d", type, Rd, Rs1, Rs2));
         pc++;
     }
