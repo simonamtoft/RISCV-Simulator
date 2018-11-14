@@ -7,7 +7,7 @@ public class processor {
     static int pc = 0;                          // Program counter
     static int[] program;                       // Array of program instructions
     static int[] reg = new int[32];             // Define register to be array of 32 elements (x0 to x31)
-    private static int[] memory = new int[512]; // 512byte of memory allocated.
+    private static int[] memory = new int[512]; // 2048 bytes of memory allocated.
 
     private static int opcode, rs1, rs2, funct3, funct7, immI, immS, immB, immU, immJ;
     static int rd;
@@ -26,7 +26,7 @@ public class processor {
             // J-type instruction
             case 0b1101111: //JAL
                 jumpType();
-
+                break;
                 // I-type instructions
             case 0b1100111: // JALR
                 jumpType();
