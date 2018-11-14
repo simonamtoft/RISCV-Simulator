@@ -1,7 +1,9 @@
 /* File: Instruction.java
- * The following file contains one instruction and all the fields
- * Made by: Marc Sun Bog & Simon Amtoft Pedersen
+ * Authors: Marc Sun Bog & Simon Amtoft Pedersen
+ *
+ * The following file contains one RV32I instruction and all the possible fields
  */
+
 
 package RISCVSimulator;
 
