@@ -49,7 +49,7 @@ public class Memory {
         return returnValue;
     }
 
-    public byte[] get() {
+    public byte[] getArray() {
         return memory;
     }
 
