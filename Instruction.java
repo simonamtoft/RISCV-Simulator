@@ -1,9 +1,15 @@
+/* File: Instruction.java
+ * The following file contains one instruction and all the fields
+ * Made by: Marc Sun Bog & Simon Amtoft Pedersen
+ */
+
 package RISCVSimulator;
 
 public class Instruction {
-    int opcode, rd, rs1, rs2, funct3, funct7, immI, immS, immB, immU, immJ;
+    int opcode, rd, rs1, rs2, funct3, funct7, immI, immS, immB, immU, immJ, instruction;
 
     public Instruction(int instruction) {
+        this.instruction = instruction; 
         this.opcode = instruction & 0x7F;
         this.rd = (instruction >>7) & 0x1F;      // Returns bits 11 to 7
         this.funct3 = (instruction>>12) & 0x7;   // Returns bits 14 to 12
