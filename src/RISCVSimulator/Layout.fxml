@@ -44,8 +44,8 @@
                             <content>
                                 <TableView prefHeight="200.0" prefWidth="200.0">
                                     <columns>
-                                        <TableColumn fx:id="registerColumn" prefWidth="75.0" text="Register" />
-                                        <TableColumn fx:id="registerValueColumn" prefWidth="75.0" text="Value" />
+                                        <TableColumn fx:id="registerColumn" editable="false" prefWidth="75.0" sortable="false" text="Register" />
+                                        <TableColumn fx:id="registerValueColumn" editable="false" prefWidth="125.0" sortable="false" text="Value" />
                                     </columns>
                                 </TableView>
                             </content>
@@ -54,8 +54,8 @@
                             <content>
                                 <TableView prefHeight="200.0" prefWidth="200.0">
                                     <columns>
-                                        <TableColumn fx:id="memoryColumn" prefWidth="75.0" text="Address" />
-                                        <TableColumn fx:id="memoryDataColumn" prefWidth="75.0" text="Data" />
+                                        <TableColumn fx:id="memoryColumn" editable="false" prefWidth="75.0" sortable="false" text="Address" />
+                                        <TableColumn fx:id="memoryDataColumn" editable="false" prefWidth="125.0" sortable="false" text="Data" />
                                     </columns>
                                 </TableView>
                             </content>
@@ -87,7 +87,7 @@
                                 <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
                             </VBox.margin>
                         </HBox>
-                        <TableView prefHeight="200.0" prefWidth="200.0">
+                        <TableView prefHeight="207.0" prefWidth="400.0">
                             <columns>
                                 <TableColumn fx:id="pcColumn" minWidth="50.0" prefWidth="0.0" text="PC" />
                                 <TableColumn fx:id="instructionColumn" minWidth="100.0" prefWidth="0.0" text="Instruction" />
