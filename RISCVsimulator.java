@@ -33,9 +33,8 @@ public class RISCVsimulator extends Application {
         replaceRegNode(2, ""+proc.reg[2]);
 
         System.out.println("Machine code \t Basic code");
-
         while (proc.pc < proc.program.length) {
-            System.out.print(String.format("0x%08X",proc.program[proc.pc]) + "\t\t");
+            proc.printMachineCode();
             proc.executeInstruction();
             replaceRegNode(proc.rd,""+proc.reg[proc.rd]);
         }
