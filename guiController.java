@@ -1,3 +1,9 @@
+/* File: guiController.java
+ * Authors: Marc Sun Bog & Simon Amtoft Pedersen
+ *
+ * The following file handles the controls associated with the GUI
+ */
+
 package RISCVSimulator;
 
 import javafx.scene.control.Button;
