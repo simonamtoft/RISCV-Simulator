@@ -7,10 +7,10 @@ public class processor {
     static int pc = 0;                          // Program counter
     static int[] program;                       // Array of program instructions
     static int[] reg = new int[32];             // Define register to be array of 32 elements (x0 to x31)
-    static int[] memory = new int[32];          // 32byte of memory allocated.
+    private static int[] memory = new int[512]; // 512byte of memory allocated.
 
-    private static int rs1, rs2, funct3, funct7, immI, immS, immB, immU, immJ;
-    static int opcode, rd;
+    private static int opcode, rs1, rs2, funct3, funct7, immI, immS, immB, immU, immJ;
+    static int rd;
 
     // Executes one instruction
     public static void executeInstruction(){
@@ -20,44 +20,44 @@ public class processor {
         switch(opcode){
             // R-type instructions
             case 0b0110011: // ADD / SUB / SLL / SLT / SLTU / XOR / SRL / SRA / OR / AND
-                rType(instruction);
+                rType();
                 break;
 
             // J-type instruction
             case 0b1101111: //JAL
-                jumpType(instruction, opcode);
+                jumpType();
 
                 // I-type instructions
             case 0b1100111: // JALR
-                jumpType(instruction, opcode);
+                jumpType();
                 break;
             case 0b0000011: // LB / LH / LW / LBU / LHU
-                iTypeLoad(instruction);
+                iTypeLoad();
                 break;
             case 0b0010011: // ADDI / SLTI / SLTIU / XORI / ORI / ANDI / SLLI / SRLI / SRAI
-                iTypeInteger(instruction);
+                iTypeInteger();
                 break;
             case 0b0001111: // FENCE / FENCE.I
-                iTypeFence(instruction);
+                iTypeFence();
                 break;
             case 0b1110011: // ECALL / EBREAK / CSRRW / CSRRS / CSRRC / CSRRWI / CSRRSI / CSRRCI
-                iTypeStatus(instruction);
+                iTypeStatus();
                 break;
 
             //S-type instructions
             case 0b0100011: //SB / SH / SW
-                sType(instruction);
+                sType();
                 break;
 
             //B-type instructions
             case 0b1100011: // BEQ / BNE / BLT / BGE / BLTU / BGEU
-                bType(instruction);
+                bType();
                 break;
 
             //U-type instructions
             case 0b0110111: //LUI
             case 0b0010111: //AUIPC
-                uType(instruction, opcode);
+                uType();
                 break;
         }
         reg[0] = 0; // x0 must always be 0
@@ -110,7 +110,7 @@ public class processor {
     }
 
     // JAL and JALR
-    private static void jumpType(int instruction, int opcode){
+    private static void jumpType(){
         int imm = 0;
         String type = "opcode??";
         switch(opcode){
@@ -132,7 +132,7 @@ public class processor {
     }
 
     // R-type instructions: ADD / SUB / SLL / SLT / SLTU / XOR / SRL / SRA / OR / AND
-    private static void rType(int instruction) {
+    private static void rType() {
         String type = "rType??";
         switch(funct3){
             case 0b000: // ADD / SUB
@@ -195,7 +195,7 @@ public class processor {
     }
 
     // I-type load instructions: LB / LH / LW / LBU / LHU
-    private static void iTypeLoad(int instruction) {
+    private static void iTypeLoad() {
         int addr = reg[rs1] + immI; // Byte address
         String type;
 
@@ -231,7 +231,7 @@ public class processor {
     }
 
     // I-type integer instructions: ADDI / SLTI / SLTIU / XORI / ORI / ANDI / SLLI / SRLI / SRAI
-    private static void iTypeInteger(int instruction) {
+    private static void iTypeInteger() {
         String type = "iType??";
         switch(funct3){
             case 0b000: // ADDI
@@ -287,7 +287,7 @@ public class processor {
     }
 
     // I-type fence instructions: FENCE / FENCE.I
-    private static void iTypeFence(int instruction) {
+    private static void iTypeFence() {
         switch(funct3){
             case 0b000: // FENCE
                 break;
@@ -298,7 +298,7 @@ public class processor {
     }
 
     // I-type status & call instructions: ECALL / EBREAK / CSRRW / CSRRS / CSRRC / CSRRWI / CSRRSI / CSRRCI
-    private static void iTypeStatus(int instruction) {
+    private static void iTypeStatus() {
         switch(funct3){
             case 0b000: // ECALL / EBREAK
                 switch(immI){
@@ -349,7 +349,7 @@ public class processor {
     }
 
     // S-type instructions: SB / SH / SW
-    private static void sType(int instruction) {
+    private static void sType() {
         int addr = reg[rs1] + immS;
         String type = "sType??";
         switch(funct3){
@@ -373,7 +373,7 @@ public class processor {
     }
 
     // B-type instructions: BEQ / BNE / BLT / BGE / BLTU / BGEU
-    private static void bType(int instruction) {
+    private static void bType() {
         int ImmB = immB >> 2; //We're counting in words instead of bytes
         String type = "bType??";
         switch(funct3){
@@ -406,7 +406,7 @@ public class processor {
     }
 
     // U-type instructions: LUI / AUIPC
-    private static void uType(int instruction, int opcode){
+    private static void uType(){
         String type = "uType??";
         switch(opcode){
             case 0b0010111: // AUIPC
@@ -422,4 +422,7 @@ public class processor {
         pc++;
     }
 
+    public static void printMachineCode() {
+        System.out.print(String.format("0x%08X", program[pc]) + "\t\t");
+    }
 }
