@@ -7,9 +7,9 @@
 package RISCVSimulator;
 
 public class Instruction {
-    int opcode, rd, rs1, rs2, funct3, funct7, immI, immS, immB, immU, immJ, instruction;
+    int instruction, opcode, rd, rs1, rs2, funct3, funct7, immI, immS, immB, immU, immJ;
+    String assemblyString;
 
-    // Constructor
     public Instruction(int instruction) {
         this.instruction = instruction;
         this.opcode = instruction & 0x7F;
@@ -23,6 +23,227 @@ public class Instruction {
         this.immB = getImmB(instruction);
         this.immU = instruction & 0xFFFFF000;
         this.immJ = getImmJ(instruction);
+        this.assemblyString = toAssemblyString();
+    }
+
+    private String toAssemblyString(){
+        String instr = "", arg1 = "", arg2 = "", arg3 = "";
+        switch(opcode){
+            // R-type instructions
+            case 0b0110011: // ADD / SUB / SLL / SLT / SLTU / XOR / SRL / SRA / OR / AND
+                arg1 = String.format("x%02d", rd);
+                arg2 = String.format("x%02d", rs1);
+                arg3 = String.format("x%02d", rs2);
+                switch(funct3){
+                    case 0b000: // ADD / SUB
+                        switch(funct7){
+                            case 0b0000000: // ADD
+                                instr = "add";
+                                break;
+                            case 0b0100000: // SUB
+                                instr = "sub";
+                        }
+                        break;
+                    case 0b001: // SLL
+                        instr = "sll";
+                        break;
+                    case 0b010: // SLT
+                        instr = "slt";
+                        break;
+                    case 0b011: // SLTU
+                        instr = "sltu";
+                        break;
+                    case 0b100: // XOR
+                        instr = "xor";
+                        break;
+                    case 0b101: // SRL / SRA
+                        switch(funct7){
+                            case 0b0000000: // SRL
+                                instr = "srl";
+                                break;
+                            case 0b0100000: // SRA
+                                instr = "sra";
+                                break;
+                        }
+                        break;
+                    case 0b110: // OR
+                        instr = "or";
+                        break;
+                    case 0b111: // AND
+                        instr = "and";
+                }
+                break;
+            case 0b1101111: //JAL
+                arg1 = String.format("x%02d", rd);
+                arg2 = String.format("x%x", immJ);
+                instr = "jal";
+                break;
+            case 0b1100111: // JALR
+                arg1 = String.format("x%02d", rd);
+                arg2 = String.format("x%x", immI);
+                instr = "jalr";
+                break;
+            case 0b0000011: // LB / LH / LW / LBU / LHU
+                arg1 = String.format("x%d", rd);
+                arg2 = String.format("%d(x%d)", immI, rs1);
+                switch(funct3){
+                    case 0b000: // LB
+                        instr = "lb";
+                        break;
+                    case 0b001: // LH
+                        instr = "lh";
+                        break;
+                    case 0b010: // LW
+                        instr = "lw";
+                        break;
+                    case 0b100: // LBU
+                        instr = "lbu";
+                        break;
+                    case 0b101: // LHU
+                        instr = "lhu";
+                        break;
+                }
+                break;
+            case 0b0010011: // ADDI / SLTI / SLTIU / XORI / ORI / ANDI / SLLI / SRLI / SRAI
+                arg1 = String.format("x%d", rd);
+                arg2 = String.format("x%d", rs1);
+                arg3 = String.format("%d", immI);
+                switch(funct3){
+                    case 0b000: // ADDI
+                        instr = "addi";
+                        break;
+                    case 0b010: // SLTI
+                        instr = "slti";
+                        break;
+                    case 0b011: // SLTIU
+                        instr = "sltiu";
+                        break;
+                    case 0b100: // XORI
+                        instr = "xori";
+                        break;
+                    case 0b110: // ORI
+                        instr = "ori";
+                        break;
+                    case 0b111: // ANDI
+                        instr = "andi";
+                        break;
+                    case 0b001: // SLLI
+                        instr = "slli";
+                        break;
+                    case 0b101: // SRLI / SRAI
+                        switch(funct7){
+                            case 0b0000000: // SRLI
+                                instr = "srli";
+                                break;
+                            case 0b0100000: // SRAI
+                                instr = "srai";
+                                break;
+                        }
+                        break;
+                }
+                break;
+            case 0b0001111: // FENCE / FENCE.I
+                switch(funct3){
+                    case 0b000: // FENCE
+                        instr = "fence";
+                        break;
+                    case 0b001: // FENCE.I
+                        instr = "fence.i";
+                        break;
+                }
+                break;
+            case 0b1110011: // ECALL / EBREAK / CSRRW / CSRRS / CSRRC / CSRRWI / CSRRSI / CSRRCI
+                switch(funct3){
+                    case 0b000: // ECALL / EBREAK
+                        switch(immI){
+                            case 0b000000000000: // ECALL
+                                instr = "ecall";
+                                break;
+                            case 0b000000000001: // EBREAK
+                                instr = "ebreak";
+                                break;
+                        }
+                        break;
+                    case 0b001: // CSRRW
+                        instr = "csrrw";
+                        break;
+                    case 0b010: // CSRRS
+                        instr = "csrrs";
+                        break;
+                    case 0b011: // CSRRC
+                        instr = "csrrc";
+                        break;
+                    case 0b101: // CSRRWI
+                        instr = "csrrwi";
+                        break;
+                    case 0b110: // CSRRSI
+                        instr = "csrrsi";
+                        break;
+                    case 0b111: // CSRRCI
+                        instr = "csrrci";
+                        break;
+                }
+                break;
+
+            //S-type instructions
+            case 0b0100011: //SB / SH / SW
+                arg1 = String.format("x%d", rs2);
+                arg2 = String.format("%d(x%d)", immS, rs1);
+                switch(funct3){
+                    case 0b000: // SB
+                        instr = "sb";
+                        break;
+                    case 0b001: // SH
+                        instr = "sh";
+                        break;
+                    case 0b010: // SW
+                        instr = "sw";
+                        break;
+                }
+                break;
+
+            //B-type instructions
+            case 0b1100011: // BEQ / BNE / BLT / BGE / BLTU / BGEU
+                arg1 = String.format("x%d", rs1);
+                arg2 = String.format("x%d", rs2);
+                arg3 = String.format("%d", immB);
+                switch(funct3){
+                    case 0b000: // BEQ
+                        instr = "beq";
+                        break;
+                    case 0b001: // BNE
+                        instr = "bne";
+                        break;
+                    case 0b100: // BLT
+                        instr = "blt";
+                        break;
+                    case 0b101: // BGE
+                        instr = "bge";
+                        break;
+                    case 0b110: //BLTU
+                        instr = "bltu";
+                        break;
+                    case 0b111: //BLGEU
+                        instr = "blgeu";
+                        break;
+                }
+                break;
+
+            //U-type instructions
+            case 0b0110111: //LUI
+                arg1 = String.format("x%d", rd);
+                arg2 = String.format("%d", immU>>>12);
+                instr = "lui";
+                break;
+            case 0b0010111: //AUIPC
+                arg1 = String.format("x%d", rd);
+                arg2 = String.format("%d", immU >>> 12);
+                instr = "auipc";
+                break;
+            default:
+                return "Unimplemented opcode";
+        }
+        return String.format("%s %s %s %s", instr, arg1, arg2, arg3);
     }
 
     private int getImmB (int instruction) {
