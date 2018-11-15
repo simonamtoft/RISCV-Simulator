@@ -37,7 +37,7 @@ public class Memory {
     }
 
     public int getWord(int addr){
-        return ((memory[addr+3] << 8) | (memory[addr+2] << 16) | (memory[addr+1] << 8) | (memory[addr]));
+        return ((memory[addr+3] << 24) | (memory[addr+2] << 16) | (memory[addr+1] << 8) | (memory[addr]));
     }
 
     public String toString(int addr){
