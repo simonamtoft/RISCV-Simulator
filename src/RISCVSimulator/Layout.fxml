@@ -42,10 +42,10 @@
                     <tabs>
                         <Tab text="Registers">
                             <content>
-                                <TableView prefHeight="200.0" prefWidth="200.0">
+                                <TableView fx:id="regTable" prefHeight="200.0" prefWidth="200.0">
                                     <columns>
-                                        <TableColumn fx:id="registerColumn" editable="false" prefWidth="75.0" sortable="false" text="Register" />
-                                        <TableColumn fx:id="registerValueColumn" editable="false" prefWidth="125.0" sortable="false" text="Value" />
+                                        <TableColumn fx:id="regNameCol" editable="false" prefWidth="75.0" sortable="false" text="Register" />
+                                        <TableColumn fx:id="regValCol" editable="false" prefWidth="125.0" sortable="false" text="Value" />
                                     </columns>
                                 </TableView>
                             </content>
@@ -67,17 +67,17 @@
                         <HBox spacing="8.0">
                             <children>
                                 <Region HBox.hgrow="ALWAYS" />
-                                <Button fx:id="buttonNext" mnemonicParsing="false" text="Next">
+                                <Button fx:id="buttonNext" mnemonicParsing="false" onAction="#nextButton" text="Next">
                                     <HBox.margin>
                                         <Insets />
                                     </HBox.margin>
                                 </Button>
-                                <Button fx:id="buttonPrevious" mnemonicParsing="false" text="Previous">
+                                <Button fx:id="buttonPrevious" mnemonicParsing="false" onAction="#previousButton" text="Previous">
                                     <HBox.margin>
                                         <Insets />
                                     </HBox.margin>
                                 </Button>
-                                <Button fx:id="buttonRun" mnemonicParsing="false" text="Run">
+                                <Button fx:id="buttonRun" mnemonicParsing="false" onAction="#runButton" text="Run">
                                     <HBox.margin>
                                         <Insets />
                                     </HBox.margin>
