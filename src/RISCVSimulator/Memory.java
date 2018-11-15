@@ -4,6 +4,7 @@
  * The following file has a memory byte array and handles input and read from the array
  */
 package RISCVSimulator;
+import java.nio.charset.StandardCharsets;
 
 public class Memory {
     private byte[] memory;
@@ -27,6 +28,13 @@ public class Memory {
         memory[addr+2]  = (byte) (data & 0x00FF0000);
         memory[addr+3]  = (byte) (data & 0xFF000000);
     }
+    
+    public void storeString(int addr, String data){
+        byte[] str = data.getBytes(StandardCharsets.US_ASCII);
+        for(int i = 0; i < str.length; i++){
+            memory[addr+i] = str[i];
+        }
+    }
 
     public byte getByte (int addr) {
         return memory[addr];
@@ -40,7 +48,7 @@ public class Memory {
         return ((memory[addr+3] << 24) | (memory[addr+2] << 16) | (memory[addr+1] << 8) | (memory[addr]));
     }
 
-    public String toString(int addr){
+    public String getString(int addr){
         String returnValue = "";
         int i = 0;
         while(memory[addr+i] != 0){
