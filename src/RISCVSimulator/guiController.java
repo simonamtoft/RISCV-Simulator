@@ -1,119 +1,73 @@
-/* File: guiController.java
+/* File: Main.java
  * Authors: Marc Sun Bog & Simon Amtoft Pedersen
  *
- * The following file handles the controls associated with the GUI
+ * The following file is the main file for the RISCV-Simulator of the RV32I instructions.
  */
-
 package RISCVSimulator;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.fxml.Initializable;
-import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.application.Application;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
 
-import java.net.URL;
-import java.util.ResourceBundle;
+import java.io.DataOutputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
-public class guiController implements Initializable{
-    public MenuItem menuItemOpen;
-    public MenuItem menuItemExit;
-    public Button buttonNext;
-    public Button buttonPrevious;
-    public Button buttonRun;
-    public TableColumn pcColumn;
-    public TableColumn instructionColumn;
-    public TextArea outputArea;
+public class Main extends Application {
 
-    // Register TableView variables
-    static public TableView<tableHelper> regTable;
-    public TableColumn<tableHelper, String> regNameCol;
-    public TableColumn<tableHelper, Integer> regValCol;
-
-    // Variables used for new tableHelper object
+    static Instruction[] programInst;  // Array of all program instructions
+    static Memory memory = new Memory(512) ;
 
 
-    public guiController() {
-        
+    public static void main(String[] args) throws IOException {
+        CPU cpu = new CPU();
+        guiController gui = new guiController();
+
+
+        String test = "addlarge";               // Name of test file
+        String dir = "tests\\";                 // Directory
+        String path = dir+test+".bin";          // Path of binary file
+        cpu.reg[2] = 128*1000-4;                    // Initialize sp to last word in memory.
+        programInst = cpu.getInstructions(path);
+
+
+
+        // gui.replaceRegVal(5,5);
+
+        System.out.println("Basic code");
+
+
+        while (cpu.pc < programInst.length) {
+            cpu.executeInstruction(programInst, memory);
+           // gui.replaceRegNode(programInst[cpu.pc-1].rd,""+cpu.reg[cpu.pc-1]);
+        }
+        outToBin(cpu.reg);
+        launch(args);
+
     }
 
     /**
-     * Runs in start of guiController.
-     * Uses method initializeRegTable() to initialize regTable's two columns with reg x0 to x31.
-     * @Override
+     * This method starts the GUI
+     * @Override method in Application
      */
-    public void initialize(URL location, ResourceBundle resources) {
-        // Setup columns of register TableView
-        regNameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
-        regValCol.setCellValueFactory(new PropertyValueFactory<>("value"));
-
-        // Load data
-        regTable.setItems(initializeRegTable());
+    public void start(Stage primaryStage) throws Exception{
+        Parent root = FXMLLoader.load(getClass().getResource("Layout.fxml"));
+        primaryStage.setTitle("RV32I Simulator");
+        primaryStage.setScene(new Scene(root, 800, 500));
+        primaryStage.show();
     }
-
-    public void nextButton() {
-        System.out.println("Put 'next' button code here");
-
-    }
-
-    public void previousButton() {
-        System.out.println("Put 'previous' button code here");
-    }
-
-    public void runButton() {
-        System.out.println("Put 'run' button code here");
-    }
-
 
     /**
-     * This method initializes the TableView 'regTable' variable with registers x0 to x31 and value 0
-     * @return ObservableList<tableHelper>
+     *  @output results in binary file 'output.bin'
      */
-    private ObservableList<tableHelper> initializeRegTable() {
-        ObservableList<tableHelper> registers = FXCollections.observableArrayList();
-        registers.add(new tableHelper("x0",0));
-        registers.add(new tableHelper("x1",0));
-        registers.add(new tableHelper("x2",0));
-        registers.add(new tableHelper("x3",0));
-        registers.add(new tableHelper("x4",0));
-        registers.add(new tableHelper("x5",0));
-        registers.add(new tableHelper("x6",0));
-        registers.add(new tableHelper("x7",0));
-        registers.add(new tableHelper("x8",0));
-        registers.add(new tableHelper("x9",0));
-        registers.add(new tableHelper("x10",0));
-        registers.add(new tableHelper("x11",0));
-        registers.add(new tableHelper("x12",0));
-        registers.add(new tableHelper("x13",0));
-        registers.add(new tableHelper("x14",0));
-        registers.add(new tableHelper("x15",0));
-        registers.add(new tableHelper("x16",0));
-        registers.add(new tableHelper("x17",0));
-        registers.add(new tableHelper("x18",0));
-        registers.add(new tableHelper("x19",0));
-        registers.add(new tableHelper("x20",0));
-        registers.add(new tableHelper("x21",0));
-        registers.add(new tableHelper("x22",0));
-        registers.add(new tableHelper("x23",0));
-        registers.add(new tableHelper("x24",0));
-        registers.add(new tableHelper("x25",0));
-        registers.add(new tableHelper("x26",0));
-        registers.add(new tableHelper("x27",0));
-        registers.add(new tableHelper("x28",0));
-        registers.add(new tableHelper("x29",0));
-        registers.add(new tableHelper("x30",0));
-        registers.add(new tableHelper("x31",0));
-        return registers;
+    private static void outToBin(int[] reg) throws IOException {
+        DataOutputStream dos = new DataOutputStream(new FileOutputStream("output.bin"));
+        for (int val : reg) {
+            dos.writeInt(Integer.reverseBytes(val));
+        }
+        dos.close();
     }
-
-
-    /**
-     * This method will replace a value in the register table
-     */
-    public void replaceRegVal(int index, int val) {
-        regTable.getItems().get(index).setValue(val);
-    }
-
-
 
 }
