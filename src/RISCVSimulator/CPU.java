@@ -6,186 +6,211 @@
 
 package RISCVSimulator;
 
-public class CPU {
-    int pc = 0;
-    int[] reg = new int[32];
-    private Memory memory;
-    private Instruction[] program;
 
-    public CPU(Memory memory, Instruction[] program){
-        this.memory = memory;
+public class CPU {
+    int pc = 0;                 // Program counter
+    static int[] reg = new int[32];              // RISC-V registers x0 to x31
+    public Instruction[] program;
+    private Memory memory;
+
+    public CPU(Memory mem, Instruction[] program) {
+        this.memory = mem;
         this.program = program;
-        reg[2] = memory.getMemory().length - 1;
+        reg[2] = memory.getArray().length - 1;
     }
 
-    public void executeInstruction() {
-        Instruction instr = program[pc];
-        switch (instr.opcode) {
+    // Executes one instruction
+    public void executeInstruction(){
+        switch(program[pc].opcode){
             // R-type instructions
             case 0b0110011: // ADD / SUB / SLL / SLT / SLTU / XOR / SRL / SRA / OR / AND
-                rType(instr);
+                rType(program[pc]);
                 break;
+
             // J-type instruction
             case 0b1101111: //JAL
+                jumpType(program[pc]);
+                break;
             // I-type instructions
             case 0b1100111: // JALR
-                jumpTypes(instr);
+                jumpType(program[pc]);
                 break;
             case 0b0000011: // LB / LH / LW / LBU / LHU
-                iTypeLoad(instr);
+                iTypeLoad(program[pc], memory);
                 break;
             case 0b0010011: // ADDI / SLTI / SLTIU / XORI / ORI / ANDI / SLLI / SRLI / SRAI
-                iTypeInteger(instr);
+                iTypeInteger(program[pc]);
                 break;
             case 0b0001111: // FENCE / FENCE.I
-                iTypeFence(instr);
+                iTypeFence(program[pc]);
                 break;
             case 0b1110011: // ECALL / EBREAK / CSRRW / CSRRS / CSRRC / CSRRWI / CSRRSI / CSRRCI
-                iTypeStatus(instr);
+                iTypeStatus(program);
                 break;
 
             //S-type instructions
             case 0b0100011: //SB / SH / SW
-                sType(instr);
+                sType(program[pc], memory);
                 break;
 
             //B-type instructions
             case 0b1100011: // BEQ / BNE / BLT / BGE / BLTU / BGEU
-                bType(instr);
+                bType(program[pc]);
                 break;
 
             //U-type instructions
             case 0b0110111: //LUI
             case 0b0010111: //AUIPC
-                uType(instr);
+                uType(program[pc]);
                 break;
         }
         reg[0] = 0; // x0 must always be 0
     }
 
-    private void jumpTypes(Instruction inst){
+    // JAL and JALR
+    private void jumpType(Instruction inst){
+        int imm = 0;
         switch(inst.opcode){
             case 0b1101111: //JAL
-                reg[inst.rd] = (pc+1) << 2; // Store address of next instruction in bytes
-                pc += inst.immJ >> 2;
+                imm = inst.immJ; // Used for printing
+                reg[inst.rd] = (pc+1)*4; // Store address of next instruction in bytes
+                pc += imm/4;
                 break;
             case 0b1100111: //JALR
-                reg[inst.rd] = (pc+1) << 2;
-                pc = ((reg[inst.rs1] + inst.immI) & 0xFFFFFFFE) >> 2;
+                imm = inst.immI; // Used for printing
+                reg[inst.rd] = (pc+1)*4;
+                pc = ((reg[inst.rs1] + imm) & 0xFFFFFFFE)/4;
                 break;
         }
-
+        pc++;
     }
 
+    // R-type instructions: ADD / SUB / SLL / SLT / SLTU / XOR / SRL / SRA / OR / AND
     private void rType(Instruction inst) {
+        // Used in all instructions, defined to reduce line length
+        int rd = inst.rd;
+        int rs1 = inst.rs1;
+        int rs2 = inst.rs2;
+
         switch(inst.funct3){
             case 0b000: // ADD / SUB
                 switch(inst.funct7){
                     case 0b0000000: // ADD
-                        reg[inst.rd] = reg[inst.rs1] + reg[inst.rs2];
+                        reg[rd] = reg[rs1] + reg[rs2];
                         break;
                     case 0b0100000: // SUB
-                        reg[inst.rd] = reg[inst.rs1] - reg[inst.rs2];
+                        reg[rd] = reg[rs1] - reg[rs2];
                         break;
                 }
                 break;
             case 0b001: // SLL
-                reg[inst.rd] = reg[inst.rs1] << reg[inst.rs2];
+                reg[rd] = reg[rs1] << reg[rs2];
                 break;
             case 0b010: // SLT
-                if (reg[inst.rs1] < reg[inst.rs2])
-                    reg[inst.rd] = 1;
+                if (reg[rs1] < reg[rs2])
+                    reg[rd] = 1;
                 else
-                    reg[inst.rd] = 0;
+                    reg[rd] = 0;
                 break;
             case 0b011: // SLTU
-                if (Integer.toUnsignedLong(reg[inst.rs1]) < Integer.toUnsignedLong(reg[inst.rs2]))
-                    reg[inst.rd] = 1;
+                if (Integer.toUnsignedLong(reg[rs1]) < Integer.toUnsignedLong(reg[rs2]))
+                    reg[rd] = 1;
                 else
-                    reg[inst.rd] = 0;
+                    reg[rd] = 0;
                 break;
             case 0b100: // XOR
-                reg[inst.rd] = reg[inst.rs1] ^ reg[inst.rs2];
+                reg[rd] = reg[rs1] ^ reg[rs2];
                 break;
             case 0b101: // SRL / SRA
                 switch(inst.funct7){
                     case 0b0000000: // SRL
-                        reg[inst.rd] = reg[inst.rs1] >>> reg[inst.rs2];
+                        reg[rd] = reg[rs1] >>> reg[rs2];
                         break;
                     case 0b0100000: // SRA
-                        reg[inst.rd] = reg[inst.rs1] >> reg[inst.rs2];
+                        reg[rd] = reg[rs1] >> reg[rs2];
                         break;
                 }
                 break;
             case 0b110: // OR
-                reg[inst.rd] = reg[inst.rs1] | reg[inst.rs2];
+                reg[rd] = reg[rs1] | reg[rs2];
                 break;
             case 0b111: // AND
-                reg[inst.rd] = reg[inst.rs1] & reg[inst.rs2];
+                reg[rd] = reg[rs1] & reg[rs2];
                 break;
         }
         pc++;
     }
 
-    private void iTypeLoad(Instruction inst) {
-        int addr = reg[inst.rs1] + inst.immI;
+    // I-type load instructions: LB / LH / LW / LBU / LHU
+    private void iTypeLoad(Instruction inst, Memory mem) {
+        int rd = inst.rd;
+        int addr = reg[inst.rs1] + inst.immI; // Byte address
+
         switch(inst.funct3){
+            // This assumes properly aligned addresses in all scenarios. LH / LW wont work properly if misaligned.
             case 0b000: // LB
-                reg[inst.rd] = memory.get_byte_from_mem(addr);
+                reg[rd] = mem.getByte(addr);
                 break;
             case 0b001: // LH
-                reg[inst.rd] = memory.get_halfword_from_mem(addr);
+                reg[rd] = mem.getHalfWord(addr);
                 break;
             case 0b010: // LW
-                reg[inst.rd] = memory.get_word_from_mem(addr);
+                reg[rd] = mem.getWord(addr);
                 break;
             case 0b100: // LBU
-                reg[inst.rd] = memory.get_byte_from_mem(addr) & 0xFF; //Remove sign bits
+                reg[rd] = mem.getByte(addr) & 0xFF; //Remove sign bits
                 break;
             case 0b101: // LHU
-                reg[inst.rd] = memory.get_halfword_from_mem(addr) & 0xFFFF;
+                reg[rd] = mem.getHalfWord(addr) & 0xFFFF;
+                break;
+            default:
                 break;
         }
         pc++;
     }
 
+    // I-type integer instructions: ADDI / SLTI / SLTIU / XORI / ORI / ANDI / SLLI / SRLI / SRAI
     private void iTypeInteger(Instruction inst) {
+        int immI = inst.immI;
+        int rs1 = inst.rs1;
+        int rd = inst.rd;
+
         switch(inst.funct3){
             case 0b000: // ADDI
-                reg[inst.rd] = reg[inst.rs1] + inst.immI;
+                reg[rd] = reg[rs1] + immI;
                 break;
             case 0b010: // SLTI
-                if(reg[inst.rs1] < inst.immI)
-                    reg[inst.rd] = 1;
+                if(reg[rs1] < immI)
+                    reg[rd] = 1;
                 else
-                    reg[inst.rd] = 0;
+                    reg[rd] = 0;
                 break;
             case 0b011: // SLTIU
-                if(Integer.toUnsignedLong(reg[inst.rs1]) < Integer.toUnsignedLong(inst.immI))
-                    reg[inst.rd] = 1;
+                if(Integer.toUnsignedLong(reg[rs1]) < Integer.toUnsignedLong(immI))
+                    reg[rd] = 1;
                 else
-                    reg[inst.rd] = 0;
+                    reg[rd] = 0;
                 break;
             case 0b100: // XORI
-                reg[inst.rd] = reg[inst.rs1] ^ inst.immI;
+                reg[rd] = reg[rs1] ^ immI;
                 break;
             case 0b110: // ORI
-                reg[inst.rd] = reg[inst.rs1] | inst.immI;
+                reg[rd] = reg[rs1] | immI;
                 break;
             case 0b111: // ANDI
-                reg[inst.rd] = reg[inst.rs1] & inst.immI;
+                reg[rd] = reg[rs1] & immI;
                 break;
             case 0b001: // SLLI
-                reg[inst.rd] = reg[inst.rs1] << inst.immI;
+                reg[rd] = reg[rs1] << immI;
                 break;
             case 0b101: // SRLI / SRAI
-                int ShiftAmt = inst.immI & 0x1F;
+                int ShiftAmt = immI & 0x1F;
                 switch(inst.funct7){
                     case 0b0000000: // SRLI
-                        reg[inst.rd] = reg[inst.rs1] >>> ShiftAmt;
+                        reg[rd] = reg[rs1] >>> ShiftAmt;
                         break;
                     case 0b0100000: // SRAI
-                        reg[inst.rd] = reg[inst.rs1] >> ShiftAmt;
+                        reg[rd] = reg[rs1] >> ShiftAmt;
                         break;
                 }
                 break;
@@ -193,24 +218,16 @@ public class CPU {
         pc++;
     }
 
-    private void iTypeFence(Instruction inst) {
-        switch(inst.funct3){
-            case 0b000: // FENCE
-                break;
-            case 0b001: // FENCE.I
-                break;
-        }
-        pc++;
-    }
-
-    private void iTypeStatus(Instruction inst) {
-        switch(inst.funct3){
+    // I-type status & call instructions: ECALL / EBREAK / CSRRW / CSRRS / CSRRC / CSRRWI / CSRRSI / CSRRCI
+    private void iTypeStatus(Instruction[] programInst) {
+        switch(programInst[pc].funct3){
             case 0b000: // ECALL / EBREAK
-                switch(inst.immI){
+                switch(programInst[pc].immI){
                     case 0b000000000000: // ECALL
+                        System.out.println("ECALL "+ reg[10]);
                         switch (reg[10]) {
                             case 1:     // print_int
-                                //System.out.print(reg[11]);
+                                System.out.print(reg[11]);
                                 break;
                             case 4:     // print_string
                                 //System.out.print(memory[reg[11]]);
@@ -219,14 +236,14 @@ public class CPU {
                                 // not sure if we can do this?
                                 break;
                             case 10:    // exit
-                                pc = program.length; // Sets program counter to end of program, to program loop
+                                pc = programInst.length; // Sets program counter to end of program, to program loop
                                 return;              // Exits 'iTypeStatus' function and returns to loop.
                             case 11:    // print_character
-                                // System.out.print((char) reg[11]);
+                                System.out.print((char) reg[11]);
                                 break;
                             case 17:    // exit2
-                                pc = program.length;
-                                // System.out.println("Return code: " + reg[11]); // Prints a1 (should be return?)
+                                pc = programInst.length;
+                                System.out.println("Return code: " + reg[11]); // Prints a1 (should be return?)
                                 return;
                             default:
                                 System.out.println("ECALL " + reg[10] + " not implemented");
@@ -252,50 +269,53 @@ public class CPU {
         pc++;
     }
 
-    private void sType(Instruction inst) {
+    // S-type instructions: SB / SH / SW
+    private void sType(Instruction inst, Memory mem) {
         int addr = reg[inst.rs1] + inst.immS;
         switch(inst.funct3){
             case 0b000: // SB
-                memory.store_byte_to_mem(addr, reg[inst.rs2]);
+                mem.storeByte(addr,(byte) reg[inst.rs2]);
                 break;
             case 0b001: // SH
-                memory.store_halfword_to_mem(addr, reg[inst.rs2]);
+                mem.storeHalfWord(addr, (short) reg[inst.rs2]);
                 break;
             case 0b010: // SW
-                memory.store_word_to_mem(addr, reg[inst.rs2]);
+                mem.storeWord(addr, reg[inst.rs2]);
                 break;
         }
         pc++;
     }
 
+    // B-type instructions: BEQ / BNE / BLT / BGE / BLTU / BGEU
     private void bType(Instruction inst) {
         int ImmB = inst.immB >> 2; //We're counting in words instead of bytes
         switch(inst.funct3){
             case 0b000: // BEQ
-                pc += (reg[inst.rs1] == reg[inst.rs2]) ? ImmB : 1;
+                pc += (reg[inst.rs1] == reg[inst.rs2])? ImmB : 1;
                 break;
             case 0b001: // BNE
-                pc += (reg[inst.rs1] != reg[inst.rs2]) ? ImmB : 1;
+                pc += (reg[inst.rs1] != reg[inst.rs2])? ImmB : 1;
                 break;
             case 0b100: // BLT
-                pc += (reg[inst.rs1] < reg[inst.rs2]) ? ImmB : 1;
+                pc += (reg[inst.rs1] < reg[inst.rs2])? ImmB : 1;
                 break;
             case 0b101: // BGE
-                pc += (reg[inst.rs1] >= reg[inst.rs2]) ? ImmB : 1;
+                pc += (reg[inst.rs1] >= reg[inst.rs2])? ImmB : 1;
                 break;
             case 0b110: //BLTU
-                pc += (Integer.toUnsignedLong(reg[inst.rs1]) < Integer.toUnsignedLong(reg[inst.rs2])) ? ImmB : 1;
+                pc += (Integer.toUnsignedLong(reg[inst.rs1]) < Integer.toUnsignedLong(reg[inst.rs2]))? ImmB : 1;
                 break;
             case 0b111: //BLGEU
-                pc += (Integer.toUnsignedLong(reg[inst.rs1]) >= Integer.toUnsignedLong(reg[inst.rs2])) ? ImmB : 1;
+                pc += (Integer.toUnsignedLong(reg[inst.rs1]) >= Integer.toUnsignedLong(reg[inst.rs2]))? ImmB : 1;
                 break;
         }
     }
 
+    // U-type instructions: LUI / AUIPC
     private void uType(Instruction inst){
         switch(inst.opcode){
             case 0b0010111: // AUIPC
-                reg[inst.rd] = (pc << 2) + inst.immU; // As we count in 4 byte words
+                reg[inst.rd] = pc*4 + inst.immU; // As we count in 4 byte words
                 break;
             case 0b0110111: // LUI
                 reg[inst.rd] = inst.immU;
@@ -303,7 +323,15 @@ public class CPU {
         }
         pc++;
     }
+
+    // I-type fence instructions: FENCE / FENCE.I
+    private void iTypeFence(Instruction program) {
+        switch(program.funct3){
+            case 0b000: // FENCE
+                break;
+            case 0b001: // FENCE.I
+                break;
+        }
+        pc++;
+    }
 }
-
-
-
