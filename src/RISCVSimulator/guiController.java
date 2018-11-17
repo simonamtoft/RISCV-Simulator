@@ -17,185 +17,208 @@ import javafx.stage.FileChooser;
 
 import java.io.*;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.ResourceBundle;
 
-public class guiController implements Initializable{
-    // UI elements
+public class guiController implements Initializable {
+    //UI elements
     public VBox mainVBox;
     public MenuItem menuItemOpen;
     public MenuItem menuItemExit;
+    //Tables
+    public TableView<TableHelper> regTable;
+    public TableColumn<TableHelper, String> registerColumn;
+    public TableColumn<TableHelper, String> registerValueColumn;
+    public TableView<TableHelper> memTable;
+    public TableColumn<TableHelper, String> memoryColumn;
+    public TableColumn<TableHelper, String> memoryDataColumn;
+    public TableView<TableHelper> pcTable;
+    public TableColumn<TableHelper, String> pcColumn;
+    public TableColumn<TableHelper, String> instructionColumn;
+    //Buttons
     public Button buttonNext;
     public Button buttonPrevious;
     public Button buttonRun;
-    public TableColumn pcColumn;
-    public TableColumn instructionColumn;
+    public Button buttonReset;
+    //Output
     public TextArea outputArea;
 
-    // Register TableView variables
-    public TableView<tableHelper> regTable;
-    public TableColumn<tableHelper, String> regNameCol;
-    public TableColumn<tableHelper, Integer> regValCol;
+    //Table selection
+    private TableView.TableViewSelectionModel<TableHelper> pcSelection;
+    private TableView.TableViewSelectionModel<TableHelper> regSelection;
+    private TableView.TableViewSelectionModel<TableHelper> memSelection;
 
-    // Program variables
-    private static CPU cpu;
-    private static Instruction[] program;   // Array of all program instructions
-    private static Memory mem;              // Memory
+    //Controller variables
+    private Instruction[] program;
+    private Memory mem = new Memory(1024);
+    private CPU cpu;
 
-    /**
-     * Runs in start of guiController.
-     * Uses method initializeRegTable() to initialize regTable's two columns with reg x0 to x31.
-     * @Override
-     */
+    //History keeping for stepping back and forth
+    private ArrayList<int[]> regHistory = new ArrayList<>();
+    private ArrayList<Integer> pcHistory = new ArrayList<>();
+
+    @Override
     public void initialize(URL location, ResourceBundle resources) {
-        // Setup columns of register TableView
-        regNameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
-        regValCol.setCellValueFactory(new PropertyValueFactory<>("value"));
+        pcColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+        instructionColumn.setCellValueFactory(new PropertyValueFactory<>("value"));
+        pcSelection = pcTable.getSelectionModel();
 
-        // Load data
-        regTable.setItems(initializeRegTable());
+        registerColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+        registerValueColumn.setCellValueFactory(new PropertyValueFactory<>("value"));
+        regTable.setItems(initializeRegisterTable());
+        regSelection = regTable.getSelectionModel();
+
+        memoryColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+        memoryDataColumn.setCellValueFactory(new PropertyValueFactory<>("value"));
+        memTable.setItems(initializeMemoryTable());
+        memSelection = memTable.getSelectionModel();
     }
 
-    /**
-     * Following method handles file picking by user in the menu.
-     * @throws IOException
-     */
-    public void chooseFile() throws IOException {
+    public void chooseFile(ActionEvent actionEvent) throws IOException{
         FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Open binary RISC-V code");
+        fileChooser.setTitle("Open binary RISCV code");
+        fileChooser.setInitialDirectory(new File(System.getProperty("user.dir")));
         File file = fileChooser.showOpenDialog(mainVBox.getScene().getWindow());
         if(file != null){
+            //Initialize processor
             program = getInstructions(file);
-            mem = new Memory(102400);
-            cpu = new CPU(mem,program);
-            replaceRegVal(2,cpu.reg[2]);
+            cpu = new CPU(mem, program);
+            //Initialize register and memory
+            memTable.setItems(initializeMemoryTable());
+            regTable.setItems(initializeRegisterTable());
+            //Display default stack pointer value
+            replaceTableVal(regTable, 2, String.format("%d", cpu.reg[2]));
+            pcTable.setItems(initializePcTable(program));
+            pcSelection.clearAndSelect(0);
+            buttonNext.setDisable(false);
+            buttonRun.setDisable(false);
+            buttonReset.setDisable(false);
         } else {
             program = null;
-            mem = null;
             cpu = null;
+            buttonNext.setDisable(true);
+            buttonPrevious.setDisable(true);
+            buttonRun.setDisable(true);
+            buttonReset.setDisable(true);
         }
     }
 
-    /**
-     * Handles action when 'next' button is pressed.
-     * If a file has been picked, and program is not done, then it executes the next instruction
-     */
-    public void nextButton(){
-        if (program == null || cpu == null || mem == null) {
-            consolePrint("program null");
-            return;
-        }
-        if(cpu.pc >= program.length) {
-            consolePrint("program finished");
-            return;
-        }
+    public void closeProgram(ActionEvent actionEvent){
+        System.exit(0);
+    }
+
+    public void executeNextInstruction(ActionEvent actionEvent){
+        if(buttonPrevious.isDisabled()) buttonPrevious.setDisable(false);
+        pcHistory.add(cpu.pc);
+        int[] temp = new int[32];
+        System.arraycopy(cpu.reg,0, temp,0,32);
+        regHistory.add(temp);
         cpu.executeInstruction();
         updateNext();
-    }
-
-    public void previousButton() {
-    }
-
-
-    /**
-     * Handles action when 'run' button is pressed.
-     * If a file has been picked, and program is not done, then it executes the remaining instructions
-     */
-    public void runButton() {
-        if (program == null || cpu == null || mem == null) {
-            consolePrint("program null");
-            return;
+        if(cpu.pc >= program.length){
+            buttonRun.setDisable(true);
+            buttonNext.setDisable(true);
         }
+    }
 
-        while (cpu.pc < program.length) {
+    public void rewindOnce(ActionEvent actionEvent) {
+        if(buttonNext.isDisabled()) buttonNext.setDisable(false);
+        if(buttonRun.isDisabled()) buttonRun.setDisable(false);
+        //Select previous program counter
+        pcSelection.clearAndSelect(cpu.prevPc);
+
+        //Revert program counter
+        if(pcHistory.size() > 1) cpu.prevPc = pcHistory.get(pcHistory.size() - 2);
+        else cpu.prevPc = 0;
+        cpu.pc = pcHistory.get(pcHistory.size() - 1);
+
+        //Select program counter from 2 iterations back
+        regSelection.clearAndSelect(program[cpu.prevPc].rd);
+
+        //Revert register values
+        System.arraycopy(regHistory.get(regHistory.size()-1), 0, cpu.reg, 0, 32);
+        replaceTableVal(regTable, program[cpu.pc].rd, String.format("%d", cpu.reg[program[cpu.pc].rd]));
+
+        //Delete from history
+        pcHistory.remove(pcHistory.size() - 1);
+        regHistory.remove(regHistory.size() - 1);
+        if(pcHistory.isEmpty()) buttonPrevious.setDisable(true);
+    }
+
+    public void executeRestOfProgram(ActionEvent actionEvent) {
+        if(program == null || cpu == null || mem == null) return;
+        if(cpu.pc >= program.length) return;
+        buttonNext.setDisable(true);
+        buttonPrevious.setDisable(true);
+        buttonRun.setDisable(true);
+        while(cpu.pc < program.length){
             cpu.executeInstruction();
             updateNext();
         }
     }
 
-    /**
-     * Updates GUI according to next instruction
-     */
+    public void resetProgram(ActionEvent actionEvent) {
+        buttonNext.setDisable(false);
+        buttonPrevious.setDisable(true);
+        buttonRun.setDisable(false);
+        cpu = new CPU(mem, program);
+        memTable.setItems(initializeMemoryTable());
+        regTable.setItems(initializeRegisterTable());
+        replaceTableVal(regTable, 2, String.format("%d", cpu.reg[2]));
+        pcTable.setItems(initializePcTable(program));
+        pcSelection.clearAndSelect(0);
+    }
+
+    /* HELPER METHODS */
+
     private void updateNext() {
-        replaceRegVal(cpu.program[cpu.pc].rd,cpu.reg[cpu.program[cpu.pc].rd]);
-        replaceRegVal(2,cpu.reg[2]);
-        consolePrint(program[cpu.pc].toAssemblyString());
+        replaceTableVal(regTable, program[cpu.prevPc].rd, String.format("%d", cpu.reg[program[cpu.prevPc].rd]));
+        //some mem stuff here
+        pcSelection.clearAndSelect(cpu.pc);
+        if(program[cpu.prevPc].noRd) return;
+        regSelection.clearAndSelect(program[cpu.prevPc].rd);
     }
 
-    /**
-     * This method will replace a value in the register table
-     */
-    private void replaceRegVal(int index, int val) {
-        regTable.getItems().get(index).setValue(val);
+    private void replaceTableVal(TableView<TableHelper> table, int index, String val) {
+        table.getItems().get(index).setValue(val);
     }
 
-    /**
-     * This method simulates a console in the GUI.
-     * Outputs the input string on next line
-     */
     private void consolePrint(String outPrint) {
         outputArea.setText(outputArea.getText()+outPrint+"\n"); // doesn't work when called in main.
     }
 
-    // Closes program
-    public void closeProgram() throws IOException{
-        outToBin(cpu.reg);
-        System.exit(0);
+    private ObservableList<TableHelper> initializePcTable(Instruction[] program){
+        ObservableList<TableHelper> pcTable = FXCollections.observableArrayList();
+        for(int i = 0; i < program.length; i++){
+            pcTable.add(new TableHelper(String.format("%d", i << 2), String.format("%s", program[i].assemblyString)));
+        }
+        return pcTable;
     }
 
+    private ObservableList<TableHelper> initializeMemoryTable(){
+        ObservableList<TableHelper> memTable = FXCollections.observableArrayList();
+        for(int i = 0; i < mem.getMemory().length; i += 4){
+            memTable.add(new TableHelper(String.format("0x%04X", i), String.format("0x%08X",0)));
+        }
+        return memTable;
+    }
 
+    private ObservableList<TableHelper> initializeRegisterTable(){
+        ObservableList<TableHelper> regTable = FXCollections.observableArrayList();
+        for(int i = 0; i < 32; i++){
+            regTable.add(new TableHelper("x"+i, "0"));
+        }
+        return regTable;
+    }
 
-    // Adds instructions from binary file to program array
-    private static Instruction[] getInstructions(File f) throws IOException {
+    private Instruction[] getInstructions(File f) throws IOException {
         DataInputStream dis = new DataInputStream(new FileInputStream(f));
-        int len = (int) f.length()/4;                       // Number of instructions
-        Instruction[] programInst = new Instruction[len];   // Instruction array
-        for(int i = 0; i < len; i++){
+        Instruction[] programInst = new Instruction[(int) f.length()/4];
+        for(int i = 0; i < programInst.length; i++){
             programInst[i] = new Instruction(Integer.reverseBytes(dis.readInt()));
         }
         dis.close();
         return programInst;
-    }
-
-
-    /**
-     * This method initializes the TableView 'regTable' variable with registers x0 to x31 and value 0
-     * @return ObservableList<tableHelper>
-     */
-    public ObservableList<tableHelper> initializeRegTable() {
-        ObservableList<tableHelper> registers = FXCollections.observableArrayList();
-        registers.add(new tableHelper("x0",0));
-        registers.add(new tableHelper("x1",0));
-        registers.add(new tableHelper("x2",0));
-        registers.add(new tableHelper("x3",0));
-        registers.add(new tableHelper("x4",0));
-        registers.add(new tableHelper("x5",0));
-        registers.add(new tableHelper("x6",0));
-        registers.add(new tableHelper("x7",0));
-        registers.add(new tableHelper("x8",0));
-        registers.add(new tableHelper("x9",0));
-        registers.add(new tableHelper("x10",0));
-        registers.add(new tableHelper("x11",0));
-        registers.add(new tableHelper("x12",0));
-        registers.add(new tableHelper("x13",0));
-        registers.add(new tableHelper("x14",0));
-        registers.add(new tableHelper("x15",0));
-        registers.add(new tableHelper("x16",0));
-        registers.add(new tableHelper("x17",0));
-        registers.add(new tableHelper("x18",0));
-        registers.add(new tableHelper("x19",0));
-        registers.add(new tableHelper("x20",0));
-        registers.add(new tableHelper("x21",0));
-        registers.add(new tableHelper("x22",0));
-        registers.add(new tableHelper("x23",0));
-        registers.add(new tableHelper("x24",0));
-        registers.add(new tableHelper("x25",0));
-        registers.add(new tableHelper("x26",0));
-        registers.add(new tableHelper("x27",0));
-        registers.add(new tableHelper("x28",0));
-        registers.add(new tableHelper("x29",0));
-        registers.add(new tableHelper("x30",0));
-        registers.add(new tableHelper("x31",0));
-        return registers;
     }
 
     /**
