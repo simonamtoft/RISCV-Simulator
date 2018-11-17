@@ -7,54 +7,34 @@
 package RISCVSimulator;
 
 public class Instruction {
-    int opcode, rd, rs1, rs2, funct3, funct7, immI, immS, immB, immU, immJ, instruction;
+    int instruction, opcode, rd, rs1, rs2, funct3, funct7, immI, immS, immB, immU, immJ;
+    boolean noRd = false;
     String assemblyString;
 
-    // Constructor
     public Instruction(int instruction) {
         this.instruction = instruction;
-        opcode = instruction & 0x7F;
-        rd = (instruction >>7) & 0x1F;      // Returns bits 11 to 7
-        funct3 = (instruction>>12) & 0x7;   // Returns bits 14 to 12
-        funct7 = (instruction>>25) & 0x7F;  // Returns bits 31 to 25
-        rs1 = (instruction >>15) & 0x1F;    // Returns bits 19 to 15
-        rs2 = (instruction>>20) & 0x1F;     // Returns bits 24 to 20
-        immI = (instruction>>20);           // Returns bits 31 to 20
-        immS = rd | (funct7<<5); // Returns bits 31 to 25 and 11 to 7
-        immB = getImmB(instruction);
-        immU = instruction & 0xFFFFF000;
-        immJ = getImmJ(instruction);
-        assemblyString = toAssemblyString();
+        this.opcode = instruction & 0x7F;
+        this.rd = (instruction >>7) & 0x1F;      // Returns bits 11 to 7
+        this.funct3 = (instruction>>12) & 0x7;   // Returns bits 14 to 12
+        this.funct7 = (instruction>>25) & 0x7F;  // Returns bits 31 to 25
+        this.rs1 = (instruction >>15) & 0x1F;    // Returns bits 19 to 15
+        this.rs2 = (instruction>>20) & 0x1F;     // Returns bits 24 to 20
+        this.immI = (instruction>>20);           // Returns bits 31 to 20
+        this.immS = (((instruction >> 20) & 0xFFFFFFE0) | ((instruction >>> 7) & 0x0000001F)); // Returns bits 31 to 25 and 11 to 7
+        this.immB = getImmB(instruction);
+        this.immU = instruction & 0xFFFFF000;
+        this.immJ = getImmJ(instruction);
+        this.assemblyString = toAssemblyString();
     }
 
-    private int getImmB (int instruction) {
-        int b11 = (instruction>>7) & 0x1;       // 11'th bit of immediate (7th bit of instruction)
-        int b1to4 = (instruction>>8) & 0xF;     // Bits 1 to 4 of immediate (8 to 11 of instruction)
-        int b5to10 = (instruction>>25) & 0x1F;  // Bits 5 to 10 of immediate (25 to 30 of instruction)
-        int b12 = (instruction>>31) & 0x1;      // Bit 12 of immediate (MSB of instruction)
-
-        // Returns bits in the order: imm[12|10:5|4:1|11]
-        return b11 << 11 | b1to4 << 1 | b5to10 << 5 | b12 << 12;
-    }
-
-    private int getImmJ(int instruction) {
-        int b12to19 = (instruction>>12) & 0xFF; // Bits 12 to 19 of immediate (12 to 19 of instruction)
-        int b11 = (instruction>>20) & 0x1;      // Bit 11 of immediate (20th bit of instruction)
-        int b1to10 = (instruction>>21) & 0x3FF; // Bit 1 to 10 of immediate (21 to 30 of instruction)
-        int b20 = (instruction>>31);            // Bit 20 of immediate (MSB of instruction)
-
-        // Returns bits in the order: imm[20|10:1|11|19:12]
-        return (b20 << 20 | b12to19 << 12 | b11 << 11 | b1to10 << 1);
-    }
-
-    public String toAssemblyString(){
+    private String toAssemblyString(){
         String instr = "", arg1 = "", arg2 = "", arg3 = "";
         switch(opcode){
             // R-type instructions
             case 0b0110011: // ADD / SUB / SLL / SLT / SLTU / XOR / SRL / SRA / OR / AND
-                arg1 = String.format("x%02d", rd);
-                arg2 = String.format("x%02d", rs1);
-                arg3 = String.format("x%02d", rs2);
+                arg1 = String.format("x%d", rd);
+                arg2 = String.format("x%d", rs1);
+                arg3 = String.format("x%d", rs2);
                 switch(funct3){
                     case 0b000: // ADD / SUB
                         switch(funct7){
@@ -95,13 +75,13 @@ public class Instruction {
                 }
                 break;
             case 0b1101111: //JAL
-                arg1 = String.format("x%02d", rd);
-                arg2 = String.format("x%x", immJ);
+                arg1 = String.format("x%d", rd);
+                arg2 = String.format("x%d", immJ);
                 instr = "jal";
                 break;
             case 0b1100111: // JALR
-                arg1 = String.format("x%02d", rd);
-                arg2 = String.format("x%x", immI);
+                arg1 = String.format("x%d", rd);
+                arg2 = String.format("x%d", immI);
                 instr = "jalr";
                 break;
             case 0b0000011: // LB / LH / LW / LBU / LHU
@@ -124,6 +104,7 @@ public class Instruction {
                         instr = "lhu";
                         break;
                 }
+                noRd = true;
                 break;
             case 0b0010011: // ADDI / SLTI / SLTIU / XORI / ORI / ANDI / SLLI / SRLI / SRAI
                 arg1 = String.format("x%d", rd);
@@ -221,6 +202,7 @@ public class Instruction {
                         instr = "sw";
                         break;
                 }
+                noRd = true;
                 break;
 
             //B-type instructions
@@ -248,6 +230,7 @@ public class Instruction {
                         instr = "blgeu";
                         break;
                 }
+                noRd = true;
                 break;
 
             //U-type instructions
@@ -265,5 +248,26 @@ public class Instruction {
                 return "Unimplemented opcode";
         }
         return String.format("%s %s %s %s", instr, arg1, arg2, arg3);
+    }
+
+    private int getImmB (int instruction) {
+        //int b11 = (instruction>>7) & 0x1;       // 11'th bit of immediate (7th bit of instruction)
+        //int b1to4 = (instruction>>8) & 0xF;     // Bits 1 to 4 of immediate (8 to 11 of instruction)
+        //int b5to10 = (instruction>>25) & 0x1F;  // Bits 5 to 10 of immediate (25 to 30 of instruction)
+        //int b12 = (instruction>>31) & 0x1;      // Bit 12 of immediate (MSB of instruction)
+
+        // Returns bits in the order: imm[12|10:5|4:1|11]
+        //return b11 << 11 | b1to4 << 1 | b5to10 << 5 | b12 << 12;
+        return (((((instruction >> 20) & 0xFFFFFFE0) | ((instruction >>> 7) & 0x0000001F)) & 0xFFFFF7FE) | ((   (((instruction >> 20) & 0xFFFFFFE0) | ((instruction >>> 7) & 0x0000001F)) & 0x00000001) << 11));
+    }
+
+    private int getImmJ(int instruction) {
+        int b12to19 = (instruction>>12) & 0xFF; // Bits 12 to 19 of immediate (12 to 19 of instruction)
+        int b11 = (instruction>>20) & 0x1;      // Bit 11 of immediate (20th bit of instruction)
+        int b1to10 = (instruction>>21) & 0x3FF; // Bit 1 to 10 of immediate (21 to 30 of instruction)
+        int b20 = (instruction>>31);            // Bit 20 of immediate (MSB of instruction)
+
+        // Returns bits in the order: imm[20|10:1|11|19:12]
+        return (b20 << 20 | b12to19 << 12 | b11 << 11 | b1to10 << 1);
     }
 }
