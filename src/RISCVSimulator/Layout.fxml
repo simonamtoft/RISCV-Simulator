@@ -12,96 +12,94 @@
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.input.KeyCodeCombination?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox fx:id="mainVBox" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="RISCVSimulator.guiController">
-   <children>
-      <MenuBar>
-        <menus>
-          <Menu mnemonicParsing="false" text="File">
-            <items>
-              <MenuItem fx:id="menuItemOpen" mnemonicParsing="false" onAction="#chooseFile" text="Open...">
-                     <accelerator>
-                        <KeyCodeCombination alt="UP" code="O" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
-                     </accelerator>
-                  </MenuItem>
-                  <MenuItem fx:id="menuItemExit" mnemonicParsing="false" onAction="#closeProgram" text="Exit">
-                     <accelerator>
-                        <KeyCodeCombination alt="UP" code="Q" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
-                     </accelerator>
-                  </MenuItem>
-            </items>
-          </Menu>
-        </menus>
-      </MenuBar>
-      <HBox prefHeight="100.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
-         <children>
-            <TabPane prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE">
-              <tabs>
-                <Tab text="Registers">
-                     <content>
-                        <TableView fx:id="regTable" prefHeight="200.0" prefWidth="200.0">
-                          <columns>
-                            <TableColumn fx:id="registerColumn" prefWidth="75.0" text="Register" />
-                            <TableColumn fx:id="registerValueColumn" prefWidth="75.0" text="Value" />
-                          </columns>
+<VBox fx:id="mainVBox" prefHeight="400.0" prefWidth="424.0" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="RISCVSimulator.guiController">
+    <children>
+        <MenuBar>
+            <menus>
+                <Menu mnemonicParsing="false" text="File">
+                    <items>
+                        <MenuItem fx:id="menuItemOpen" mnemonicParsing="false" onAction="#chooseFile" text="Open...">
+                            <accelerator>
+                                <KeyCodeCombination alt="UP" code="O" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
+                            </accelerator>
+                        </MenuItem>
+                        <MenuItem fx:id="menuItemExit" mnemonicParsing="false" onAction="#closeProgram" text="Exit">
+                            <accelerator>
+                                <KeyCodeCombination alt="UP" code="Q" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
+                            </accelerator>
+                        </MenuItem>
+                    </items>
+                </Menu>
+            </menus>
+        </MenuBar>
+        <HBox prefHeight="100.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
+            <children>
+                <TabPane prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE">
+                    <tabs>
+                        <Tab text="Registers">
+                            <content>
+                                <TableView fx:id="regTable" prefHeight="200.0" prefWidth="200.0">
+                                    <columns>
+                                        <TableColumn fx:id="registerColumn" prefWidth="75.0" resizable="false" text="Register" />
+                                        <TableColumn fx:id="registerValueColumn" prefWidth="125.0" resizable="false" text="Value" />
+                                    </columns>
+                                </TableView>
+                            </content>
+                        </Tab>
+                        <Tab text="Memory">
+                            <content>
+                                <TableView fx:id="memTable" prefHeight="200.0" prefWidth="200.0">
+                                    <columns>
+                                        <TableColumn fx:id="memoryColumn" prefWidth="75.0" text="Address" />
+                                        <TableColumn fx:id="memoryDataColumn" prefWidth="75.0" text="Data" />
+                                    </columns>
+                                </TableView>
+                            </content>
+                        </Tab>
+                    </tabs>
+                </TabPane>
+                <VBox prefHeight="200.0" prefWidth="100.0" HBox.hgrow="ALWAYS">
+                    <children>
+                        <HBox spacing="8.0">
+                            <children>
+                                <Button fx:id="buttonNext" disable="true" mnemonicParsing="false" onAction="#executeNextInstruction" text="Next">
+                                    <HBox.margin>
+                                        <Insets />
+                                    </HBox.margin>
+                                </Button>
+                                <Button fx:id="buttonPrevious" disable="true" mnemonicParsing="false" onAction="#rewindOnce" text="Previous">
+                                    <HBox.margin>
+                                        <Insets />
+                                    </HBox.margin>
+                                </Button>
+                                <Button fx:id="buttonRun" disable="true" mnemonicParsing="false" onAction="#executeRestOfProgram" text="Run">
+                                    <HBox.margin>
+                                        <Insets />
+                                    </HBox.margin>
+                                </Button>
+                                <Button fx:id="buttonReset" disable="true" layoutX="239.0" layoutY="10.0" mnemonicParsing="false" onAction="#resetProgram" text="Reset" />
+                            </children>
+                            <VBox.margin>
+                                <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
+                            </VBox.margin>
+                        </HBox>
+                        <TableView fx:id="pcTable" prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
+                            <columns>
+                                <TableColumn fx:id="pcColumn" minWidth="50.0" prefWidth="0.0" resizable="false" text="PC" />
+                                <TableColumn fx:id="instructionColumn" minWidth="100.0" prefWidth="173.0" resizable="false" text="Instruction" />
+                            </columns>
                         </TableView>
-                     </content>
-                  </Tab>
-                <Tab text="Memory">
-                     <content>
-                        <TableView fx:id="memTable" prefHeight="200.0" prefWidth="200.0">
-                          <columns>
-                            <TableColumn fx:id="memoryColumn" prefWidth="75.0" text="Address" />
-                            <TableColumn fx:id="memoryDataColumn" prefWidth="75.0" text="Data" />
-                          </columns>
-                        </TableView>
-                     </content>
-                  </Tab>
-              </tabs>
-            </TabPane>
-            <VBox prefHeight="200.0" prefWidth="100.0" HBox.hgrow="ALWAYS">
-               <children>
-                  <HBox spacing="8.0">
-                     <children>
-                        <Region HBox.hgrow="ALWAYS" />
-                        <Button fx:id="buttonNext" disable="true" mnemonicParsing="false" onAction="#executeNextInstruction" text="Next">
-                           <HBox.margin>
-                              <Insets />
-                           </HBox.margin>
-                        </Button>
-                        <Button fx:id="buttonPrevious" disable="true" mnemonicParsing="false" onAction="#rewindOnce" text="Previous">
-                           <HBox.margin>
-                              <Insets />
-                           </HBox.margin>
-                        </Button>
-                        <Button fx:id="buttonRun" disable="true" mnemonicParsing="false" onAction="#executeRestOfProgram" text="Run">
-                           <HBox.margin>
-                              <Insets />
-                           </HBox.margin>
-                        </Button>
-                        <Button fx:id="buttonReset" disable="true" layoutX="239.0" layoutY="10.0" mnemonicParsing="false" onAction="#resetProgram" text="Reset" />
-                     </children>
-                     <VBox.margin>
-                        <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
-                     </VBox.margin>
-                  </HBox>
-                  <TableView fx:id="pcTable" prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
-                    <columns>
-                      <TableColumn fx:id="pcColumn" minWidth="50.0" prefWidth="0.0" text="PC" />
-                      <TableColumn fx:id="instructionColumn" minWidth="100.0" prefWidth="0.0" text="Instruction" />
-                    </columns>
-                  </TableView>
-                  <TextArea fx:id="outputArea" editable="false" prefHeight="200.0" prefWidth="200.0" promptText="Console output" VBox.vgrow="NEVER">
-                     <font>
-                        <Font name="Lucida Console" size="12.0" />
-                     </font>
-                  </TextArea>
-               </children>
-            </VBox>
-         </children>
-      </HBox>
-   </children>
+                        <TextArea fx:id="outputArea" editable="false" prefHeight="200.0" prefWidth="200.0" promptText="Console output" VBox.vgrow="NEVER">
+                            <font>
+                                <Font name="Lucida Console" size="12.0" />
+                            </font>
+                        </TextArea>
+                    </children>
+                </VBox>
+            </children>
+        </HBox>
+    </children>
 </VBox>
