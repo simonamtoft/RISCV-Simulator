@@ -8,7 +8,6 @@ package RISCVSimulator;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -20,12 +19,22 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
 
-public class guiController implements Initializable {
-    //UI elements
+public class guiController implements Initializable{
+    // UI elements
     public VBox mainVBox;
     public MenuItem menuItemOpen;
     public MenuItem menuItemExit;
-    //Tables
+
+    // Buttons
+    public Button buttonNext;
+    public Button buttonPrevious;
+    public Button buttonRun;
+    public Button buttonReset;
+
+    //Output
+    public TextArea outputArea;
+
+    // Table elements
     public TableView<TableHelper> regTable;
     public TableColumn<TableHelper, String> registerColumn;
     public TableColumn<TableHelper, String> registerValueColumn;
@@ -35,58 +44,59 @@ public class guiController implements Initializable {
     public TableView<TableHelper> pcTable;
     public TableColumn<TableHelper, String> pcColumn;
     public TableColumn<TableHelper, String> instructionColumn;
-    //Buttons
-    public Button buttonNext;
-    public Button buttonPrevious;
-    public Button buttonRun;
-    public Button buttonReset;
-    //Output
-    public TextArea outputArea;
 
     //Table selection
     private TableView.TableViewSelectionModel<TableHelper> pcSelection;
     private TableView.TableViewSelectionModel<TableHelper> regSelection;
     private TableView.TableViewSelectionModel<TableHelper> memSelection;
 
-    //Controller variables
-    private Instruction[] program;
-    private Memory mem = new Memory(1024);
-    private CPU cpu;
+    // Controller variables
+    private static CPU cpu;
+    private static Instruction[] program;
+    private static Memory mem = new Memory(1024);
 
     //History keeping for stepping back and forth
     private ArrayList<int[]> regHistory = new ArrayList<>();
     private ArrayList<Integer> pcHistory = new ArrayList<>();
 
-    @Override
+    /**
+     * Runs in start of guiController.
+     * Initializes all the three tables: regTable, memTable and pcTable.
+     * @Override
+     */
     public void initialize(URL location, ResourceBundle resources) {
         pcColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
         instructionColumn.setCellValueFactory(new PropertyValueFactory<>("value"));
         pcSelection = pcTable.getSelectionModel();
-
         registerColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
         registerValueColumn.setCellValueFactory(new PropertyValueFactory<>("value"));
         regTable.setItems(initializeRegisterTable());
         regSelection = regTable.getSelectionModel();
-
         memoryColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
         memoryDataColumn.setCellValueFactory(new PropertyValueFactory<>("value"));
         memTable.setItems(initializeMemoryTable());
         memSelection = memTable.getSelectionModel();
     }
 
-    public void chooseFile(ActionEvent actionEvent) throws IOException{
+    /**
+     * Following method handles file picking by user in the menu.
+     * If file is not picked, buttons are disabled.
+     */
+    public void chooseFile() throws IOException {
         FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Open binary RISCV code");
+        fileChooser.setTitle("Open binary RISC-V code");
         fileChooser.setInitialDirectory(new File(System.getProperty("user.dir")));
         File file = fileChooser.showOpenDialog(mainVBox.getScene().getWindow());
         if(file != null){
-            //Initialize processor
+            // Initialize processor
             program = getInstructions(file);
             cpu = new CPU(mem, program);
-            //Initialize register and memory
+
+            // Initialize register and memory
             memTable.setItems(initializeMemoryTable());
             regTable.setItems(initializeRegisterTable());
-            //Display default stack pointer value
+
+            // Display default stack pointer value
             replaceTableVal(regTable, 2, String.format("%d", cpu.reg[2]));
             pcTable.setItems(initializePcTable(program));
             pcSelection.clearAndSelect(0);
@@ -103,11 +113,11 @@ public class guiController implements Initializable {
         }
     }
 
-    public void closeProgram(ActionEvent actionEvent){
-        System.exit(0);
-    }
-
-    public void executeNextInstruction(ActionEvent actionEvent){
+    /**
+     * Handles action when 'next' button is pressed.
+     * If a file has been picked, and program is not done, then it executes the next instruction
+     */
+    public void executeNextInstruction(){
         if(buttonPrevious.isDisabled()) buttonPrevious.setDisable(false);
         pcHistory.add(cpu.pc);
         int[] temp = new int[32];
@@ -115,17 +125,21 @@ public class guiController implements Initializable {
         regHistory.add(temp);
         cpu.executeInstruction();
         updateNext();
-        if(cpu.pc >= program.length){
+        if(cpu.pc >= program.length){ // Disable press of button if program is done
             buttonRun.setDisable(true);
             buttonNext.setDisable(true);
         }
     }
 
-    public void rewindOnce(ActionEvent actionEvent) {
+    public void closeProgram() throws IOException{
+        outToBin(cpu.reg);
+        System.exit(0);
+    }
+
+    public void rewindOnce() {
         if(buttonNext.isDisabled()) buttonNext.setDisable(false);
         if(buttonRun.isDisabled()) buttonRun.setDisable(false);
-        //Select previous program counter
-        pcSelection.clearAndSelect(cpu.prevPc);
+        pcSelection.clearAndSelect(cpu.prevPc); //Select previous program counter
 
         //Revert program counter
         if(pcHistory.size() > 1) cpu.prevPc = pcHistory.get(pcHistory.size() - 2);
@@ -145,19 +159,28 @@ public class guiController implements Initializable {
         if(pcHistory.isEmpty()) buttonPrevious.setDisable(true);
     }
 
-    public void executeRestOfProgram(ActionEvent actionEvent) {
+    /**
+     * Handles action when 'run' button is pressed.
+     * If a file has been picked, and program is not done, then it executes the remaining instructions
+     */
+    public void executeRestOfProgram() {
         if(program == null || cpu == null || mem == null) return;
         if(cpu.pc >= program.length) return;
         buttonNext.setDisable(true);
         buttonPrevious.setDisable(true);
         buttonRun.setDisable(true);
+
         while(cpu.pc < program.length){
             cpu.executeInstruction();
             updateNext();
         }
     }
 
-    public void resetProgram(ActionEvent actionEvent) {
+    /**
+     * Handles action when 'reset' button is pressed.
+     * Initializes memTable, pcTable and regTable from start values.
+     */
+    public void resetProgram() {
         buttonNext.setDisable(false);
         buttonPrevious.setDisable(true);
         buttonRun.setDisable(false);
@@ -169,8 +192,11 @@ public class guiController implements Initializable {
         pcSelection.clearAndSelect(0);
     }
 
-    /* HELPER METHODS */
 
+
+    /* HELPER METHODS FOR GUI CONTROL */
+
+    //Updates GUI according to next instruction
     private void updateNext() {
         replaceTableVal(regTable, program[cpu.prevPc].rd, String.format("%d", cpu.reg[program[cpu.prevPc].rd]));
         //some mem stuff here
@@ -179,10 +205,12 @@ public class guiController implements Initializable {
         regSelection.clearAndSelect(program[cpu.prevPc].rd);
     }
 
+     //This method will replace a value in the given table
     private void replaceTableVal(TableView<TableHelper> table, int index, String val) {
         table.getItems().get(index).setValue(val);
     }
 
+    // This method simulates a console in the GUI. Outputs the input string on next line
     private void consolePrint(String outPrint) {
         outputArea.setText(outputArea.getText()+outPrint+"\n"); // doesn't work when called in main.
     }
@@ -211,10 +239,12 @@ public class guiController implements Initializable {
         return regTable;
     }
 
+    // Adds instructions from binary file to program array
     private Instruction[] getInstructions(File f) throws IOException {
         DataInputStream dis = new DataInputStream(new FileInputStream(f));
-        Instruction[] programInst = new Instruction[(int) f.length()/4];
-        for(int i = 0; i < programInst.length; i++){
+        int len = (int) f.length()/4;                       // Number of instructions
+        Instruction[] programInst = new Instruction[len];   // Instruction array
+        for(int i = 0; i < len; i++){
             programInst[i] = new Instruction(Integer.reverseBytes(dis.readInt()));
         }
         dis.close();
