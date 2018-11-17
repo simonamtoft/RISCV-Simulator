@@ -58,6 +58,7 @@ public class guiController implements Initializable{
     //History keeping for stepping back and forth
     private ArrayList<int[]> regHistory = new ArrayList<>();
     private ArrayList<Integer> pcHistory = new ArrayList<>();
+    private ArrayList<byte[]> memHistory = new ArrayList<>();
 
     /**
      * Runs in start of guiController.
@@ -92,25 +93,37 @@ public class guiController implements Initializable{
             program = getInstructions(file);
             cpu = new CPU(mem, program);
 
-            // Initialize register and memory
+            // Initialize register, memory and pc
             memTable.setItems(initializeMemoryTable());
             regTable.setItems(initializeRegisterTable());
+            pcTable.setItems(initializePcTable(program));
 
             // Display default stack pointer value
             replaceTableVal(regTable, 2, String.format("%d", cpu.reg[2]));
-            pcTable.setItems(initializePcTable(program));
-            pcSelection.clearAndSelect(0);
+
+            // Default button states
             buttonNext.setDisable(false);
             buttonRun.setDisable(false);
             buttonReset.setDisable(false);
         } else {
             program = null;
             cpu = null;
+
+            // Disable all buttons
             buttonNext.setDisable(true);
             buttonPrevious.setDisable(true);
             buttonRun.setDisable(true);
             buttonReset.setDisable(true);
         }
+        // Clear selections
+        pcSelection.clearSelection();
+        memSelection.clearSelection();
+        regSelection.clearSelection();
+
+        // Clear history
+        regHistory = new ArrayList<>();
+        memHistory = new ArrayList<>();
+        pcHistory  = new ArrayList<>();
     }
 
     /**
@@ -119,10 +132,18 @@ public class guiController implements Initializable{
      */
     public void executeNextInstruction(){
         if(buttonPrevious.isDisabled()) buttonPrevious.setDisable(false);
+        int[] tempReg = new int[32];
+        System.arraycopy(cpu.reg,0, tempReg,0,32);
         pcHistory.add(cpu.pc);
-        int[] temp = new int[32];
-        System.arraycopy(cpu.reg,0, temp,0,32);
-        regHistory.add(temp);
+        regHistory.add(tempReg);
+
+        // Only store copy of memory if the next instruction is sType to avoid too much wasted memory.
+        if(program[cpu.pc].sType){
+            byte[] tempMem = new byte[mem.getMemory().length];
+            System.arraycopy(mem.getMemory(), 0, tempMem, 0, tempMem.length);
+            memHistory.add(tempMem);
+        }
+
         cpu.executeInstruction();
         updateNext();
         if(cpu.pc >= program.length){ // Disable press of button if program is done
@@ -139,12 +160,20 @@ public class guiController implements Initializable{
     public void rewindOnce() {
         if(buttonNext.isDisabled()) buttonNext.setDisable(false);
         if(buttonRun.isDisabled()) buttonRun.setDisable(false);
-        pcSelection.clearAndSelect(cpu.prevPc); //Select previous program counter
+        // If most recently executed instruction was sType, restore memory
+        if(program[cpu.prevPc].sType){
+            int addr = cpu.reg[program[cpu.prevPc].rs1] + program[cpu.prevPc].immS;
+            System.arraycopy(memHistory.get(memHistory.size()-1), 0, mem.getMemory(), 0, mem.getMemory().length);
+            replaceTableVal(memTable, addr >> 2, String.format("0x%08X", mem.getWord(addr & 0xFFFFFF00)));
+            memSelection.clearAndSelect(addr >> 2);
+        }
+
 
         //Revert program counter
         if(pcHistory.size() > 1) cpu.prevPc = pcHistory.get(pcHistory.size() - 2);
         else cpu.prevPc = 0;
         cpu.pc = pcHistory.get(pcHistory.size() - 1);
+        pcSelection.clearAndSelect(cpu.prevPc); //Select previous program counter
 
         //Select program counter from 2 iterations back
         regSelection.clearAndSelect(program[cpu.prevPc].rd);
@@ -156,7 +185,12 @@ public class guiController implements Initializable{
         //Delete from history
         pcHistory.remove(pcHistory.size() - 1);
         regHistory.remove(regHistory.size() - 1);
-        if(pcHistory.isEmpty()) buttonPrevious.setDisable(true);
+        if(pcHistory.isEmpty()){
+            buttonPrevious.setDisable(true);
+            regSelection.clearSelection();
+            memSelection.clearSelection();
+            pcSelection.clearSelection();
+        }
     }
 
     /**
@@ -166,14 +200,26 @@ public class guiController implements Initializable{
     public void executeRestOfProgram() {
         if(program == null || cpu == null || mem == null) return;
         if(cpu.pc >= program.length) return;
-        buttonNext.setDisable(true);
-        buttonPrevious.setDisable(true);
-        buttonRun.setDisable(true);
 
         while(cpu.pc < program.length){
             cpu.executeInstruction();
             updateNext();
         }
+
+        // Disable buttons except reset
+        buttonNext.setDisable(true);
+        buttonPrevious.setDisable(true);
+        buttonRun.setDisable(true);
+
+        // Clear selections
+        pcSelection.clearSelection();
+        memSelection.clearSelection();
+        regSelection.clearSelection();
+
+        // Clear history
+        regHistory = new ArrayList<>();
+        memHistory = new ArrayList<>();
+        pcHistory  = new ArrayList<>();
     }
 
     /**
@@ -181,15 +227,27 @@ public class guiController implements Initializable{
      * Initializes memTable, pcTable and regTable from start values.
      */
     public void resetProgram() {
+        // Re-enable buttons
         buttonNext.setDisable(false);
         buttonPrevious.setDisable(true);
         buttonRun.setDisable(false);
+
+        // New CPU instance and refreshing data.
         cpu = new CPU(mem, program);
         memTable.setItems(initializeMemoryTable());
         regTable.setItems(initializeRegisterTable());
         replaceTableVal(regTable, 2, String.format("%d", cpu.reg[2]));
         pcTable.setItems(initializePcTable(program));
-        pcSelection.clearAndSelect(0);
+
+        // Clear selections
+        pcSelection.clearSelection();
+        memSelection.clearSelection();
+        regSelection.clearSelection();
+
+        // Clear history
+        regHistory = new ArrayList<>();
+        memHistory = new ArrayList<>();
+        pcHistory  = new ArrayList<>();
     }
 
 
@@ -199,9 +257,16 @@ public class guiController implements Initializable{
     //Updates GUI according to next instruction
     private void updateNext() {
         replaceTableVal(regTable, program[cpu.prevPc].rd, String.format("%d", cpu.reg[program[cpu.prevPc].rd]));
-        //some mem stuff here
-        pcSelection.clearAndSelect(cpu.pc);
-        if(program[cpu.prevPc].noRd) return;
+        pcSelection.clearAndSelect(cpu.prevPc);
+        if(program[cpu.prevPc].noRd){
+            if(program[cpu.prevPc].sType){
+                int addr = (cpu.reg[program[cpu.prevPc].rs1] + program[cpu.prevPc].immS) & 0xFFFFFFFC;
+                //Get word-address by removing byte-offset
+                replaceTableVal(memTable, addr >> 2, String.format("0x%08X", mem.getWord(addr)));
+                memSelection.clearAndSelect(addr >> 2);
+            }
+            return;
+        }
         regSelection.clearAndSelect(program[cpu.prevPc].rd);
     }
 

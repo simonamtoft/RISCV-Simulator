@@ -9,6 +9,7 @@ package RISCVSimulator;
 public class Instruction {
     int instruction, opcode, rd, rs1, rs2, funct3, funct7, immI, immS, immB, immU, immJ;
     boolean noRd = false;
+    boolean sType = false;
     String assemblyString;
 
     /**
@@ -234,6 +235,7 @@ public class Instruction {
                         break;
                 }
                 noRd = true;
+                sType = true;
                 break;
 
             //B-type instructions
