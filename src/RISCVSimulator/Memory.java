@@ -4,7 +4,6 @@
  * The following file has a memory byte array and handles input and read from the array
  */
 package RISCVSimulator;
-import java.nio.charset.StandardCharsets;
 
 public class Memory {
     private byte[] memory;
@@ -37,21 +36,21 @@ public class Memory {
     }
 
     // Returns the byte in the memory given by the address.
-    public byte getByte (int addr) {
+    byte getByte (int addr) {
         return memory[addr];
     }
 
     // Returns half word from memory array given by address
-    int getHalfword(int addr){
+    int getHalfWord(int addr){
         return (getByte(addr+1) << 8) | (getByte(addr) & 0xFF);
     }
 
     // Returns word from memory array given by address
     int getWord(int addr){
-        return (getHalfword(addr+2) << 16) | (getHalfword(addr) & 0xFFFF);
+        return (getHalfWord(addr+2) << 16) | (getHalfWord(addr) & 0xFFFF);
     }
 
-    // Returns string starting at the address given and ends when next memory address is zero.
+    // Returns string starting at the address given and ends when next memory address is zero. UN-TESTED
     String getString(int addr){
         String returnValue = "";
         int i = 0;

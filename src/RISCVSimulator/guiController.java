@@ -51,9 +51,9 @@ public class guiController implements Initializable{
     private TableView.TableViewSelectionModel<TableHelper> memSelection;
 
     // Controller variables
-    private static CPU cpu;
-    private static Instruction[] program;
-    private static Memory mem = new Memory(1024);
+    private CPU cpu;
+    private Instruction[] program;
+    private Memory mem = new Memory(1024);
 
     //History keeping for stepping back and forth
     private ArrayList<int[]> regHistory = new ArrayList<>();

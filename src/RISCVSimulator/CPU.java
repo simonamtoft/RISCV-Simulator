@@ -10,8 +10,8 @@ package RISCVSimulator;
 public class CPU {
     int pc = 0;                     // Program counter
     int prevPc;                     // Previous pc
-    static int[] reg = new int[32]; // RISC-V registers x0 to x31
-    public Instruction[] program;   // Array of all program instructions
+    int[] reg = new int[32];        // RISC-V registers x0 to x31
+    private Instruction[] program;  // Array of all program instructions
     private Memory memory;          // Memory byte array
 
     /**
