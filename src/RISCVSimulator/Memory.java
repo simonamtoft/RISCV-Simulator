@@ -5,42 +5,51 @@
  */
 package RISCVSimulator;
 
-public class Memory {
+import java.nio.charset.StandardCharsets;
+
+class Memory {
     private byte[] memory;
 
-    public Memory(int byteSize){
-        memory = new byte[byteSize];
+    Memory(int MEMORY_SIZE_IN_BYTES){
+        memory = new byte[MEMORY_SIZE_IN_BYTES];
     }
 
-    public void storeByte (int addr, byte data) {
-        memory[addr] = data;
+    void storeByte(int addr, int data){
+        memory[addr] = (byte) (data & 0xFF);
     }
 
-    public void storeHalfWord(int addr, short data) {
-        memory[addr]    = (byte) (data & 0x00FF);
-        memory[addr+1]  = (byte) (data &0xFF00);
+    void storeHalfword(int addr, int data){
+        memory[addr]    = (byte) ((data & 0x00FF));
+        memory[addr+1]  = (byte) ((data & 0xFF00) >>> 8);
     }
 
-    public void storeWord(int addr, int data) {
-        memory[addr]    = (byte) (data & 0x000000FF);
-        memory[addr+1]  = (byte) (data & 0x0000FF00);
-        memory[addr+2]  = (byte) (data & 0x00FF0000);
-        memory[addr+3]  = (byte) (data & 0xFF000000);
+    void storeWord(int addr, int data){
+        memory[addr]    = (byte) ((data & 0x000000FF));
+        memory[addr+1]  = (byte) ((data & 0x0000FF00) >>> 8);
+        memory[addr+2]  = (byte) ((data & 0x00FF0000) >>> 16);
+        memory[addr+3]  = (byte) ((data & 0xFF000000) >>> 24);
     }
 
-    public byte getByte (int addr) {
+    public void storeString(int addr, String data){
+        byte[] str = data.getBytes(StandardCharsets.US_ASCII);
+        for(int i = 0; i < str.length; i++){
+            memory[addr+i] = str[i];
+        }
+    }
+
+    int getByte(int addr){
         return memory[addr];
     }
 
-    public short getHalfWord(int addr){
-        return (short) ((memory[addr+1] << 8) | (memory[addr]));
+    int getHalfword(int addr){
+        return (getByte(addr+1) << 8) | (getByte(addr) & 0xFF);
     }
 
-    public int getWord(int addr){
-        return ((memory[addr+3] << 8) | (memory[addr+2] << 16) | (memory[addr+1] << 8) | (memory[addr]));
+    int getWord(int addr){
+        return (getHalfword(addr+2) << 16) | (getHalfword(addr) & 0xFFFF);
     }
 
-    public String toString(int addr){
+    public String getString(int addr){
         String returnValue = "";
         int i = 0;
         while(memory[addr+i] != 0){
@@ -49,8 +58,7 @@ public class Memory {
         return returnValue;
     }
 
-    public byte[] getArray() {
+    byte[] getMemory() {
         return memory;
     }
-
 }
