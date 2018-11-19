@@ -10,11 +10,11 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import java.io.IOException;
+
 
 public class Main extends Application {
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         launch(args);
     }
 
@@ -23,7 +23,10 @@ public class Main extends Application {
      * @Override method in Application
      */
     public void start(Stage primaryStage) throws Exception{
-        Parent root = FXMLLoader.load(getClass().getResource("Layout.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("Layout.fxml"));
+        Parent root = loader.load();
+        guiController controller = loader.getController();
+        controller.setStage(primaryStage);
         primaryStage.setTitle("RV32I Simulator");
         primaryStage.setScene(new Scene(root, 800, 500));
         primaryStage.show();

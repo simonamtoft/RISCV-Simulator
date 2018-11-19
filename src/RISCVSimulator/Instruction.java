@@ -269,7 +269,7 @@ public class Instruction {
             //U-type instructions
             case 0b0110111: //LUI
                 arg1 = String.format("x%d", rd);
-                arg2 = String.format("%d", immU>>>12);
+                arg2 = String.format("%d", immU >>> 12);
                 instr = "lui";
                 break;
             case 0b0010111: //AUIPC
@@ -278,7 +278,7 @@ public class Instruction {
                 instr = "auipc";
                 break;
             default:
-                return "Unimplemented opcode";
+                return String.format("Unrecognized instruction: 0x%08x", instruction);
         }
         return String.format("%s %s %s %s", instr, arg1, arg2, arg3);
     }

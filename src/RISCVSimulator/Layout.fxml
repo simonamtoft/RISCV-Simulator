@@ -15,7 +15,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox fx:id="mainVBox" prefHeight="400.0" prefWidth="424.0" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="RISCVSimulator.guiController">
+<VBox fx:id="mainVBox" prefHeight="400.0" prefWidth="424.0" xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="RISCVSimulator.guiController">
     <children>
         <MenuBar>
             <menus>
@@ -26,6 +26,11 @@
                                 <KeyCodeCombination alt="UP" code="O" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
                             </accelerator>
                         </MenuItem>
+                  <MenuItem fx:id="menuItemSave" mnemonicParsing="false" onAction="#saveRegisters" text="Save registers">
+                     <accelerator>
+                        <KeyCodeCombination alt="UP" code="S" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
+                     </accelerator>
+                  </MenuItem>
                         <MenuItem fx:id="menuItemExit" mnemonicParsing="false" onAction="#closeProgram" text="Exit">
                             <accelerator>
                                 <KeyCodeCombination alt="UP" code="Q" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
@@ -43,8 +48,8 @@
                             <content>
                                 <TableView fx:id="regTable" prefHeight="200.0" prefWidth="200.0">
                                     <columns>
-                                        <TableColumn fx:id="registerColumn" prefWidth="75.0" resizable="false" text="Register" />
-                                        <TableColumn fx:id="registerValueColumn" prefWidth="125.0" resizable="false" text="Value" />
+                                        <TableColumn fx:id="registerColumn" editable="false" prefWidth="75.0" resizable="false" sortable="false" text="Register" />
+                                        <TableColumn fx:id="registerValueColumn" editable="false" prefWidth="125.0" resizable="false" sortable="false" text="Value" />
                                     </columns>
                                 </TableView>
                             </content>
@@ -53,8 +58,8 @@
                             <content>
                                 <TableView fx:id="memTable" prefHeight="200.0" prefWidth="200.0">
                                     <columns>
-                                        <TableColumn fx:id="memoryColumn" prefWidth="75.0" text="Address" />
-                                        <TableColumn fx:id="memoryDataColumn" prefWidth="75.0" text="Data" />
+                                        <TableColumn fx:id="memoryColumn" editable="false" prefWidth="75.0" sortable="false" text="Address" />
+                                        <TableColumn fx:id="memoryDataColumn" editable="false" prefWidth="75.0" sortable="false" text="Data" />
                                     </columns>
                                 </TableView>
                             </content>
@@ -88,8 +93,8 @@
                         </HBox>
                         <TableView fx:id="pcTable" prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
                             <columns>
-                                <TableColumn fx:id="pcColumn" minWidth="50.0" prefWidth="0.0" resizable="false" text="PC" />
-                                <TableColumn fx:id="instructionColumn" minWidth="100.0" prefWidth="173.0" resizable="false" text="Instruction" />
+                                <TableColumn fx:id="pcColumn" editable="false" minWidth="50.0" prefWidth="0.0" resizable="false" sortable="false" text="PC" />
+                                <TableColumn fx:id="instructionColumn" editable="false" minWidth="100.0" prefWidth="173.0" sortable="false" text="Instruction" />
                             </columns>
                         </TableView>
                         <TextArea fx:id="outputArea" editable="false" prefHeight="200.0" prefWidth="200.0" promptText="Console output" VBox.vgrow="NEVER">

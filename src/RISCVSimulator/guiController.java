@@ -13,6 +13,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 
 import java.io.*;
 import java.net.URL;
@@ -20,6 +21,8 @@ import java.util.ArrayList;
 import java.util.ResourceBundle;
 
 public class guiController implements Initializable{
+    private Stage primaryStage;
+
     // UI elements
     public VBox mainVBox;
     public MenuItem menuItemOpen;
@@ -53,12 +56,16 @@ public class guiController implements Initializable{
     // Controller variables
     private CPU cpu;
     private Instruction[] program;
-    private Memory mem = new Memory(1024);
+    private Memory mem = new Memory(10485760); // 10MiB
 
     //History keeping for stepping back and forth
     private ArrayList<int[]> regHistory = new ArrayList<>();
     private ArrayList<Integer> pcHistory = new ArrayList<>();
     private ArrayList<byte[]> memHistory = new ArrayList<>();
+
+    void setStage(Stage stage){
+        this.primaryStage = stage;
+    }
 
     /**
      * Runs in start of guiController.
@@ -69,10 +76,12 @@ public class guiController implements Initializable{
         pcColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
         instructionColumn.setCellValueFactory(new PropertyValueFactory<>("value"));
         pcSelection = pcTable.getSelectionModel();
+
         registerColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
         registerValueColumn.setCellValueFactory(new PropertyValueFactory<>("value"));
         regTable.setItems(initializeRegisterTable());
         regSelection = regTable.getSelectionModel();
+
         memoryColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
         memoryDataColumn.setCellValueFactory(new PropertyValueFactory<>("value"));
         memTable.setItems(initializeMemoryTable());
@@ -93,10 +102,9 @@ public class guiController implements Initializable{
             program = getInstructions(file);
             cpu = new CPU(mem, program);
 
-            // Initialize register, memory and pc
-            memTable.setItems(initializeMemoryTable());
-            regTable.setItems(initializeRegisterTable());
+            // Initialize pc and mem
             pcTable.setItems(initializePcTable(program));
+            memTable.setItems(initializeMemoryTable());
 
             // Display default stack pointer value
             replaceTableVal(regTable, 2, String.format("%d", cpu.reg[2]));
@@ -105,6 +113,9 @@ public class guiController implements Initializable{
             buttonNext.setDisable(false);
             buttonRun.setDisable(false);
             buttonReset.setDisable(false);
+            outputArea.setText("");
+            primaryStage.setTitle("RV32I Simulator - "+file.getName());
+
         } else {
             program = null;
             cpu = null;
@@ -114,6 +125,7 @@ public class guiController implements Initializable{
             buttonPrevious.setDisable(true);
             buttonRun.setDisable(true);
             buttonReset.setDisable(true);
+            outputArea.setText("No file chosen.");
         }
         // Clear selections
         pcSelection.clearSelection();
@@ -124,6 +136,21 @@ public class guiController implements Initializable{
         regHistory = new ArrayList<>();
         memHistory = new ArrayList<>();
         pcHistory  = new ArrayList<>();
+    }
+
+    public void saveRegisters() throws IOException{
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Store register values as binary file");
+        fileChooser.setInitialDirectory(new File(System.getProperty("user.dir")));
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("BINARY files (*.bin)",".bin"));
+        File file = fileChooser.showSaveDialog(mainVBox.getScene().getWindow());
+        if(file != null){
+            if(cpu == null){
+                consolePrint("ERROR: No values to store");
+                return;
+            }
+            outToBin(file, cpu.reg);
+        }
     }
 
     /**
@@ -152,8 +179,7 @@ public class guiController implements Initializable{
         }
     }
 
-    public void closeProgram() throws IOException{
-        outToBin(cpu.reg);
+    public void closeProgram() {
         System.exit(0);
     }
 
@@ -248,6 +274,7 @@ public class guiController implements Initializable{
         regHistory = new ArrayList<>();
         memHistory = new ArrayList<>();
         pcHistory  = new ArrayList<>();
+        outputArea.setText("");
     }
 
 
@@ -258,16 +285,19 @@ public class guiController implements Initializable{
     private void updateNext() {
         replaceTableVal(regTable, program[cpu.prevPc].rd, String.format("%d", cpu.reg[program[cpu.prevPc].rd]));
         pcSelection.clearAndSelect(cpu.prevPc);
+        pcSelection.getTableView().scrollTo(cpu.prevPc);
         if(program[cpu.prevPc].noRd){
             if(program[cpu.prevPc].sType){
                 int addr = (cpu.reg[program[cpu.prevPc].rs1] + program[cpu.prevPc].immS) & 0xFFFFFFFC;
                 //Get word-address by removing byte-offset
                 replaceTableVal(memTable, addr >> 2, String.format("0x%08X", mem.getWord(addr)));
                 memSelection.clearAndSelect(addr >> 2);
+                memSelection.getTableView().scrollTo(addr >> 2);
             }
             return;
         }
         regSelection.clearAndSelect(program[cpu.prevPc].rd);
+        regSelection.getTableView().scrollTo(program[cpu.prevPc].rd);
     }
 
      //This method will replace a value in the given table
@@ -291,7 +321,7 @@ public class guiController implements Initializable{
     private ObservableList<TableHelper> initializeMemoryTable(){
         ObservableList<TableHelper> memTable = FXCollections.observableArrayList();
         for(int i = 0; i < mem.getMemory().length; i += 4){
-            memTable.add(new TableHelper(String.format("0x%04X", i), String.format("0x%08X",0)));
+            memTable.add(new TableHelper(String.format("0x%06X", i), String.format("0x%08X", mem.getWord(i))));
         }
         return memTable;
     }
@@ -310,7 +340,9 @@ public class guiController implements Initializable{
         int len = (int) f.length()/4;                       // Number of instructions
         Instruction[] programInst = new Instruction[len];   // Instruction array
         for(int i = 0; i < len; i++){
-            programInst[i] = new Instruction(Integer.reverseBytes(dis.readInt()));
+            int data = Integer.reverseBytes(dis.readInt());
+            programInst[i] = new Instruction(data);
+            mem.storeWord(i*4, data);
         }
         dis.close();
         return programInst;
@@ -320,8 +352,8 @@ public class guiController implements Initializable{
      *  Method reads content in registers x0 to x31 and outputs in a binary file.
      *  @output binary file 'output.bin'
      */
-    private static void outToBin(int[] reg) throws IOException {
-        DataOutputStream dos = new DataOutputStream(new FileOutputStream("output.bin"));
+    private static void outToBin(File file, int[] reg) throws IOException {
+        DataOutputStream dos = new DataOutputStream(new FileOutputStream(file));
         for (int val : reg) {
             dos.writeInt(Integer.reverseBytes(val));
         }

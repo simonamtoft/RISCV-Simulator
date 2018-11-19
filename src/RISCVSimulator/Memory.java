@@ -1,4 +1,4 @@
-/* File: Main.java
+/* File: Memory.java
  * Authors: Marc Sun Bog & Simon Amtoft Pedersen
  *
  * The following file has a memory byte array and handles input and read from the array
@@ -63,5 +63,9 @@ public class Memory {
     // Returns the memory array
     byte[] getMemory() {
         return memory;
+    }
+
+    void setMemory(byte[] mem){
+        this.memory = mem;
     }
 }

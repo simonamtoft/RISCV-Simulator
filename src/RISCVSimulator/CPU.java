@@ -252,10 +252,10 @@ public class CPU {
                     case 0b000000000000: // ECALL
                         switch (reg[10]) {
                             case 1:     // print_int
-                                //System.out.print(reg[11]);
+                                System.out.print(reg[11]);
                                 break;
                             case 4:     // print_string
-                                //System.out.print(memory[reg[11]]);
+                                System.out.print(memory.getString(reg[11]));
                                 break;
                             case 9:     // sbrk
                                 // not sure if we can do this?
@@ -264,7 +264,7 @@ public class CPU {
                                 pc = program.length; // Sets program counter to end of program, to program loop
                                 return;              // Exits 'iTypeStatus' function and returns to loop.
                             case 11:    // print_character
-                                System.out.print((char) reg[11]);
+                                System.out.println((char) reg[11]);
                                 break;
                             case 17:    // exit2
                                 pc = program.length;
