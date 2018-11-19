@@ -54,11 +54,8 @@ public class CPU {
             case 0b0010011: // ADDI / SLTI / SLTIU / XORI / ORI / ANDI / SLLI / SRLI / SRAI
                 iTypeInteger(instr);
                 break;
-            case 0b0001111: // FENCE / FENCE.I
-                iTypeFence(instr);
-                break;
-            case 0b1110011: // ECALL / EBREAK / CSRRW / CSRRS / CSRRC / CSRRWI / CSRRSI / CSRRCI
-                iTypeStatus(instr);
+            case 0b1110011: // ECALL
+                iTypeEcall(instr);
                 break;
 
             //S-type instructions
@@ -218,7 +215,7 @@ public class CPU {
     /**
      * Handles execution of i-Type ECALL instructions
      */
-    private void iTypeStatus(Instruction inst) {
+    private void iTypeEcall(Instruction inst) {
         switch (reg[10]) {
             case 1:     // print_int
                 System.out.print(reg[11]);
