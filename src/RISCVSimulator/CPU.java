@@ -39,11 +39,14 @@ public class CPU {
 
             // J-type instruction
             case 0b1101111: //JAL
-                jumpType(instr);
+                reg[inst.rd] = (pc+1)<<2; // Store address of next instruction in bytes
+                pc += inst.immJ>>2;
                 break;
+                
             // I-type instructions
             case 0b1100111: // JALR
-                jumpType(instr);
+                reg[inst.rd] = (pc+1)<<2;
+                pc = ((reg[inst.rs1] + inst.immI) & 0xFFFFFFFE)>>2;
                 break;
             case 0b0000011: // LB / LH / LW / LBU / LHU
                 iTypeLoad(instr);
@@ -75,23 +78,6 @@ public class CPU {
                 break;
         }
         reg[0] = 0; // x0 must always be 0
-    }
-
-    /**
-     * Handles execution of following instructions
-     * JAL / JALR
-     */
-    private void jumpType(Instruction inst){
-        switch(inst.opcode){
-            case 0b1101111: //JAL
-                reg[inst.rd] = (pc+1)<<2; // Store address of next instruction in bytes
-                pc += inst.immJ>>2;
-                break;
-            case 0b1100111: //JALR
-                reg[inst.rd] = (pc+1)<<2;
-                pc = ((reg[inst.rs1] + inst.immI) & 0xFFFFFFFE)>>2;
-                break;
-        }
     }
 
     /**
