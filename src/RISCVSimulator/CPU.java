@@ -55,7 +55,7 @@ public class CPU {
                 iTypeInteger(instr);
                 break;
             case 0b1110011: // ECALL
-                iTypeEcall(instr);
+                iTypeEcall();
                 break;
 
             //S-type instructions
@@ -215,7 +215,7 @@ public class CPU {
     /**
      * Handles execution of i-Type ECALL instructions
      */
-    private void iTypeEcall(Instruction inst) {
+    private void iTypeEcall() {
         switch (reg[10]) {
             case 1:     // print_int
                 System.out.print(reg[11]);
