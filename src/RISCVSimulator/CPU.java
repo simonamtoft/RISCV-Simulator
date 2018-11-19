@@ -70,11 +70,15 @@ public class CPU {
             case 0b1100011: // BEQ / BNE / BLT / BGE / BLTU / BGEU
                 bType(instr);
                 break;
-
+            
             //U-type instructions
             case 0b0110111: //LUI
+                reg[inst.rd] = inst.immU;
+                pc++;
+                break;
             case 0b0010111: //AUIPC
-                uType(instr);
+                reg[inst.rd] = (pc << 2) + inst.immU; // As we count in 4 byte words
+                pc++;
                 break;
         }
         reg[0] = 0; // x0 must always be 0
@@ -311,21 +315,5 @@ public class CPU {
                 pc += (Integer.toUnsignedLong(reg[inst.rs1]) >= Integer.toUnsignedLong(reg[inst.rs2])) ? ImmB : 1;
                 break;
         }
-    }
-
-    /**
-     * Handles the U-type instructions:
-     * LUI / AUIPC
-     */
-    private void uType(Instruction inst){
-        switch(inst.opcode){
-            case 0b0010111: // AUIPC
-                reg[inst.rd] = (pc << 2) + inst.immU; // As we count in 4 byte words
-                break;
-            case 0b0110111: // LUI
-                reg[inst.rd] = inst.immU;
-                break;
-        }
-        pc++;
     }
 }
