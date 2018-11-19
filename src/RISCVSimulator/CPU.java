@@ -212,21 +212,6 @@ public class CPU {
         pc++;
     }
 
-
-    /**
-     * Handles the I-type fence instructions:
-     * FENCE / FENCE.I
-     */
-    private void iTypeFence(Instruction inst) {
-        switch(inst.funct3){
-            case 0b000: // FENCE
-                break;
-            case 0b001: // FENCE.I
-                break;
-        }
-        pc++;
-    }
-
     /**
      * Handles execution of i-Type ECALL and status instructions:
      * ECALL / EBREAK / CSRRW / CSRRS / CSRRC / CSRRWI / CSRRSI / CSRRCI
