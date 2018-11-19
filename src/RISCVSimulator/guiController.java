@@ -56,7 +56,7 @@ public class guiController implements Initializable{
     // Controller variables
     private CPU cpu;
     private Instruction[] program;
-    private Memory mem = new Memory(10485760); // 10MiB
+    private Memory mem = new Memory(2097152); // 2MiB
 
     //History keeping for stepping back and forth
     private ArrayList<int[]> regHistory = new ArrayList<>();
