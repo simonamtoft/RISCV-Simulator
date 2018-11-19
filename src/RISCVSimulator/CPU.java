@@ -1,7 +1,7 @@
 /* File: CPU.java
  * Authors: Marc Sun Bog & Simon Amtoft Pedersen
  *
- * The following file handles Instructions
+ * The following file handles the execution of all the implemented instructions. 
  */
 
 package RISCVSimulator;
