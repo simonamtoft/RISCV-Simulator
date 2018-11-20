@@ -1,7 +1,7 @@
 /* File: CPU.java
  * Authors: Marc Sun Bog & Simon Amtoft Pedersen
  *
- * The following file handles Instructions
+ * The following file handles the execution of all the implemented instructions. 
  */
 
 package RISCVSimulator;
@@ -19,9 +19,9 @@ public class CPU {
      * and sp (x2) to point at last memory address.
      */
     public CPU(Memory mem, Instruction[] program) {
-        this.memory = mem;
-        this.program = program;
-        reg[2] = memory.getMemory().length - 1;
+        this.memory = mem;                      // Initialize Memory object
+        this.program = program;                 // Initialize array of Instruction objects
+        reg[2] = memory.getMemory().length - 1; // Initialize stack pointer to point at last address. 
     }
 
     /**
@@ -54,11 +54,8 @@ public class CPU {
             case 0b0010011: // ADDI / SLTI / SLTIU / XORI / ORI / ANDI / SLLI / SRLI / SRAI
                 iTypeInteger(instr);
                 break;
-            case 0b0001111: // FENCE / FENCE.I
-                iTypeFence(instr);
-                break;
-            case 0b1110011: // ECALL / EBREAK / CSRRW / CSRRS / CSRRC / CSRRWI / CSRRSI / CSRRCI
-                iTypeStatus(instr);
+            case 0b1110011: // ECALL
+                iTypeEcall();
                 break;
 
             //S-type instructions
@@ -70,11 +67,15 @@ public class CPU {
             case 0b1100011: // BEQ / BNE / BLT / BGE / BLTU / BGEU
                 bType(instr);
                 break;
-
+            
             //U-type instructions
             case 0b0110111: //LUI
+                reg[inst.rd] = inst.immU;
+                pc++;
+                break;
             case 0b0010111: //AUIPC
-                uType(instr);
+                reg[inst.rd] = (pc << 2) + inst.immU; // Shift pc because we count in 4 byte words
+                pc++;
                 break;
         }
         reg[0] = 0; // x0 must always be 0
@@ -142,7 +143,6 @@ public class CPU {
         int addr = reg[inst.rs1] + inst.immI; // Byte address
 
         switch(inst.funct3){
-            // This assumes properly aligned addresses in all scenarios. LH / LW wont work properly if misaligned.
             case 0b000: // LB
                 reg[inst.rd] = memory.getByte(addr);
                 break;
@@ -198,7 +198,7 @@ public class CPU {
                 reg[inst.rd] = reg[inst.rs1] << inst.immI;
                 break;
             case 0b101: // SRLI / SRAI
-                int ShiftAmt = inst.immI & 0x1F;
+                int ShiftAmt = inst.immI & 0x1F; // The amount of shifting done by SRLI or SRAI
                 switch(inst.funct7){
                     case 0b0000000: // SRLI
                         reg[inst.rd] = reg[inst.rs1] >>> ShiftAmt;
@@ -212,69 +212,32 @@ public class CPU {
         pc++;
     }
 
-
     /**
-     * Handles the I-type fence instructions:
-     * FENCE / FENCE.I
+     * Handles execution of i-Type ECALL instructions
      */
-    private void iTypeFence(Instruction inst) {
-        switch(inst.funct3){
-            case 0b000: // FENCE
+    private void iTypeEcall() {
+        switch (reg[10]) {
+            case 1:     // print_int
+                System.out.print(reg[11]);
                 break;
-            case 0b001: // FENCE.I
+            case 4:     // print_string
+                System.out.print(memory.getString(reg[11]));
                 break;
-        }
-        pc++;
-    }
-
-    /**
-     * Handles execution of i-Type ECALL and status instructions:
-     * ECALL / EBREAK / CSRRW / CSRRS / CSRRC / CSRRWI / CSRRSI / CSRRCI
-     */
-    private void iTypeStatus(Instruction inst) {
-        switch(inst.funct3){
-            case 0b000: // ECALL / EBREAK
-                switch(inst.immI){
-                    case 0b000000000000: // ECALL
-                        switch (reg[10]) {
-                            case 1:     // print_int
-                                System.out.print(reg[11]);
-                                break;
-                            case 4:     // print_string
-                                System.out.print(memory.getString(reg[11]));
-                                break;
-                            case 9:     // sbrk
-                                // not sure if we can do this?
-                                break;
-                            case 10:    // exit
-                                pc = program.length; // Sets program counter to end of program, to program loop
-                                return;              // Exits 'iTypeStatus' function and returns to loop.
-                            case 11:    // print_character
-                                System.out.println((char) reg[11]);
-                                break;
-                            case 17:    // exit2
-                                pc = program.length;
-                                //System.out.println("Return code: " + reg[11]); // Prints a1 (should be return?)
-                                return;
-                            default:
-                                System.out.println("ECALL " + reg[10] + " not implemented");
-                                break;
-                        }
-                    case 0b000000000001: // EBREAK
-                        break;
-                }
+            case 9:     // sbrk
+                // not sure if we can do this?
                 break;
-            case 0b001: // CSRRW
+            case 10:    // exit
+                pc = program.length; // Sets program counter to end of program, to program loop
+                return;              // Exits 'iTypeStatus' function and returns to loop.
+            case 11:    // print_character
+                System.out.println((char) reg[11]);
                 break;
-            case 0b010: // CSRRS
-                break;
-            case 0b011: // CSRRC
-                break;
-            case 0b101: // CSRRWI
-                break;
-            case 0b110: // CSRRSI
-                break;
-            case 0b111: // CSRRCI
+            case 17:    // exit2
+                pc = program.length;
+                //System.out.println("Return code: " + reg[11]); // Prints a1 (should be return?)
+                return;
+            default:
+                System.out.println("ECALL " + reg[10] + " not implemented");
                 break;
         }
         pc++;
@@ -326,21 +289,5 @@ public class CPU {
                 pc += (Integer.toUnsignedLong(reg[inst.rs1]) >= Integer.toUnsignedLong(reg[inst.rs2])) ? ImmB : 1;
                 break;
         }
-    }
-
-    /**
-     * Handles the U-type instructions:
-     * LUI / AUIPC
-     */
-    private void uType(Instruction inst){
-        switch(inst.opcode){
-            case 0b0010111: // AUIPC
-                reg[inst.rd] = (pc << 2) + inst.immU; // As we count in 4 byte words
-                break;
-            case 0b0110111: // LUI
-                reg[inst.rd] = inst.immU;
-                break;
-        }
-        pc++;
     }
 }
