@@ -278,7 +278,7 @@ public class Instruction {
                 instr = "auipc";
                 break;
             default:
-                return String.format("Unrecognized instruction: 0x%08x", instruction);
+                return String.format("Unrecognized: 0x%08x", instruction);
         }
         return String.format("%s %s %s %s", instr, arg1, arg2, arg3);
     }

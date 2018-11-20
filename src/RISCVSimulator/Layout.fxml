@@ -10,6 +10,7 @@
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.input.KeyCodeCombination?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
@@ -46,7 +47,7 @@
                     <tabs>
                         <Tab text="Registers">
                             <content>
-                                <TableView fx:id="regTable" prefHeight="200.0" prefWidth="200.0">
+                                <TableView fx:id="registerTable" prefHeight="200.0" prefWidth="200.0">
                                     <columns>
                                         <TableColumn fx:id="registerColumn" editable="false" prefWidth="75.0" resizable="false" sortable="false" text="Register" />
                                         <TableColumn fx:id="registerValueColumn" editable="false" prefWidth="125.0" resizable="false" sortable="false" text="Value" />
@@ -56,12 +57,26 @@
                         </Tab>
                         <Tab text="Memory">
                             <content>
-                                <TableView fx:id="memTable" prefHeight="200.0" prefWidth="200.0">
-                                    <columns>
-                                        <TableColumn fx:id="memoryColumn" editable="false" prefWidth="75.0" sortable="false" text="Address" />
-                                        <TableColumn fx:id="memoryDataColumn" editable="false" prefWidth="75.0" sortable="false" text="Data" />
-                                    </columns>
-                                </TableView>
+                        <VBox>
+                           <children>
+                                      <TableView fx:id="memoryTable" prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
+                                          <columns>
+                                              <TableColumn fx:id="memoryColumn" editable="false" prefWidth="75.0" sortable="false" text="Address" />
+                                              <TableColumn fx:id="memoryDataColumn" editable="false" prefWidth="75.0" sortable="false" text="Data" />
+                                          </columns>
+                                      </TableView>
+                              <HBox spacing="8.0">
+                                 <children>
+                                    <Button fx:id="buttonPreviousTable" disable="true" mnemonicParsing="false" onAction="#previousMemoryTable" text="&lt;&lt;" HBox.hgrow="NEVER" />
+                                    <TextField fx:id="textFieldAddr" disable="true" onAction="#gotoAddress" prefHeight="25.0" prefWidth="74.0" promptText="Go to address:" HBox.hgrow="ALWAYS" />
+                                    <Button fx:id="buttonNextTable" disable="true" mnemonicParsing="false" onAction="#nextMemoryTable" text="&gt;&gt;" HBox.hgrow="NEVER" />
+                                 </children>
+                                 <padding>
+                                    <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
+                                 </padding>
+                              </HBox>
+                           </children>
+                        </VBox>
                             </content>
                         </Tab>
                     </tabs>
@@ -91,13 +106,13 @@
                                 <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
                             </VBox.margin>
                         </HBox>
-                        <TableView fx:id="pcTable" prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
+                        <TableView fx:id="programTable" prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
                             <columns>
-                                <TableColumn fx:id="pcColumn" editable="false" minWidth="50.0" prefWidth="0.0" resizable="false" sortable="false" text="PC" />
-                                <TableColumn fx:id="instructionColumn" editable="false" minWidth="100.0" prefWidth="173.0" sortable="false" text="Instruction" />
+                                <TableColumn fx:id="programColumn" editable="false" minWidth="50.0" prefWidth="0.0" resizable="false" sortable="false" text="PC" />
+                                <TableColumn fx:id="programInstructionColumn" editable="false" minWidth="100.0" prefWidth="173.0" sortable="false" text="Instruction" />
                             </columns>
                         </TableView>
-                        <TextArea fx:id="outputArea" editable="false" prefHeight="200.0" prefWidth="200.0" promptText="Console output" VBox.vgrow="NEVER">
+                        <TextArea fx:id="textFieldConsole" editable="false" prefHeight="200.0" prefWidth="200.0" promptText="Console output" VBox.vgrow="NEVER">
                             <font>
                                 <Font name="Lucida Console" size="12.0" />
                             </font>
