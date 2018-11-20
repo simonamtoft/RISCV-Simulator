@@ -30,11 +30,11 @@ public class CPU {
      */
     public void executeInstruction(){
         prevPc = pc;
-        Instruction instr = program[pc];
-        switch(instr.opcode){
+        Instruction inst = program[pc];
+        switch(inst.opcode){
             // R-type instructions
             case 0b0110011: // ADD / SUB / SLL / SLT / SLTU / XOR / SRL / SRA / OR / AND
-                rType(instr);
+                rType(inst);
                 break;
 
             // J-type instruction
@@ -49,10 +49,10 @@ public class CPU {
                 pc = ((reg[inst.rs1] + inst.immI) & 0xFFFFFFFE)>>2;
                 break;
             case 0b0000011: // LB / LH / LW / LBU / LHU
-                iTypeLoad(instr);
+                iTypeLoad(inst);
                 break;
             case 0b0010011: // ADDI / SLTI / SLTIU / XORI / ORI / ANDI / SLLI / SRLI / SRAI
-                iTypeInteger(instr);
+                iTypeInteger(inst);
                 break;
             case 0b1110011: // ECALL
                 iTypeEcall();
@@ -60,12 +60,12 @@ public class CPU {
 
             //S-type instructions
             case 0b0100011: //SB / SH / SW
-                sType(instr);
+                sType(inst);
                 break;
 
             //B-type instructions
             case 0b1100011: // BEQ / BNE / BLT / BGE / BLTU / BGEU
-                bType(instr);
+                bType(inst);
                 break;
             
             //U-type instructions
