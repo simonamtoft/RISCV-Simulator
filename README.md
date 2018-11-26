@@ -17,21 +17,17 @@ Due to Java 8 reaching end-of-life soon, but still being most common, there are 
 ## Java Development Kit 8
 ### Compile
 Assuming no other Java files present:
-
-```javac *.java```
+```javac path/to/files/*.java```
 ### Run
-Assuming current work directy is level above compiled Java class-files.
-
-```java RISCVSimulator.Main```
+```java path/to/package/RISCVSimulator.Main```
 ## OpenJDK 11
 As OpenJDK no longer supplies a runtime environment or JavaFX, it is required to have [OpenJFX](https://openjfx.io/) downloaded.
 The path to OpenJFX will be referred to as `%PATH_TO_FX%`.
-
 ### Compile
-```javac --module-path %PATH_TO_FX% --add-modules javafx.fxml,javafx.base,javafx.controls,javafx.graphics *.java```
+```javac --module-path %PATH_TO_FX% --add-modules javafx.fxml,javafx.base,javafx.controls,javafx.graphics path/to/files/*.java```
 
 ### Run
 Requires a Java 11 Runtime Environment. This is easily obtained on Ubuntu through apt, but Windows users will need to use `jlink` to build their own.
 
-```java --module-path %PATH_TO_FX% --add-modules javafx.fxml,javafx.base,javafx.controls,javafx.graphics RISCVSimulator.Main```
+```java --module-path %PATH_TO_FX% --add-modules javafx.fxml,javafx.base,javafx.controls,javafx.graphics path/to/package/RISCVSimulator.Main```
 
