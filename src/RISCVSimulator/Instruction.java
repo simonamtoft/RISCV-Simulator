@@ -11,6 +11,7 @@ public class Instruction {
     int instruction, opcode, rd, rs1, rs2, funct3, funct7, immI, immS, immB, immU, immJ;
     boolean noRd = false;
     boolean sType = false;
+    boolean ecall = false;
     String assemblyString;
 
     /**
@@ -192,6 +193,7 @@ public class Instruction {
                         switch(immI){
                             case 0b000000000000: // ECALL
                                 instr = "ecall";
+                                ecall = true;
                                 break;
                             case 0b000000000001: // EBREAK
                                 instr = "ebreak";
@@ -215,8 +217,9 @@ public class Instruction {
                         break;
                     case 0b111: // CSRRCI
                         instr = "csrrci";
-                        break;
+                        break:
                 }
+                noRd = true;
                 break;
 
             //S-type instructions
