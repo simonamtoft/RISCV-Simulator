@@ -13,15 +13,14 @@ Simulates the [RV32I Base Instruction Set](https://content.riscv.org/wp-content/
 | 11 | print_char | Prints character in `x11` |
 
 # Compiling and running
-Due to Java 8 reaching end-of-life soon, but still being most common, there are 2 ways of compiling:
-## Java Development Kit 8
+## Java Development Kit 8/9
 ### Compile
 Assuming no other Java files present:
 
 ```javac path/to/files/*.java```
 ### Run
 ```java path/to/package/RISCVSimulator.Main```
-## OpenJDK 11
+## OpenJDK 10+
 As OpenJDK no longer supplies a runtime environment or JavaFX, it is required to have [OpenJFX](https://openjfx.io/) downloaded.
 The path to OpenJFX will be referred to as `%PATH_TO_FX%`.
 ### Compile
