@@ -63,6 +63,7 @@ public class guiController implements Initializable{
     private ArrayList<int[]> regHistory = new ArrayList<>();
     private ArrayList<Integer> pcHistory = new ArrayList<>();
     private ArrayList<byte[]> memHistory = new ArrayList<>();
+    
     // In order to pass primaryStage from Main.java
     void setStage(Stage stage){
         this.primaryStage = stage;
@@ -74,14 +75,15 @@ public class guiController implements Initializable{
      */
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        // Instruction table 
         programColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
         programInstructionColumn.setCellValueFactory(new PropertyValueFactory<>("value"));
         pcSelection = programTable.getSelectionModel();
-
+        // Register table
         registerColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
         registerValueColumn.setCellValueFactory(new PropertyValueFactory<>("value"));
         regSelection = registerTable.getSelectionModel();
-
+        // Memory table
         memoryColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
         memoryDataColumn.setCellValueFactory(new PropertyValueFactory<>("value"));
         memSelection = memoryTable.getSelectionModel();
@@ -115,10 +117,11 @@ public class guiController implements Initializable{
             if(BYTES_PR_PAGE < MEMORY_SIZE) buttonNextTable.setDisable(false);
             textFieldConsole.setText(null);
             primaryStage.setTitle("RV32I Simulator - "+file.getName());
-
         } else {
             program = null;
             cpu = null;
+            textFieldConsole.setText("No file chosen.");
+            
             // Disable all buttons
             buttonNext.setDisable(true);
             buttonPrevious.setDisable(true);
@@ -126,8 +129,7 @@ public class guiController implements Initializable{
             buttonReset.setDisable(true);
             buttonNextTable.setDisable(true);
             buttonPreviousTable.setDisable(true);
-            textFieldAddr.setDisable(true);
-            textFieldConsole.setText("No file chosen.");
+            textFieldAddr.setDisable(true); 
         }
         // Clear selections
         pcSelection.clearSelection();
