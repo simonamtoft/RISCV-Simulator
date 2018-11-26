@@ -14,8 +14,6 @@ Simulates the [RV32I Base Instruction Set](https://content.riscv.org/wp-content/
 
 # Compiling and running
 ## Java Development Kit 8
-### Prerequisites
-Java SE 8 Development Kit.
 ### Compile
 Assuming no other Java files present:
 ```
