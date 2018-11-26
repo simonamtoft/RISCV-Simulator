@@ -1,7 +1,8 @@
 /* File: Main.java
- * Authors: Marc Sun Bog & Simon Amtoft Pedersen
+ * Authors: Marc Sun Bøg & Simon Amtoft Pedersen
  *
  * The following file is the main file for the RISCV-Simulator of the RV32I instructions.
+ * The file starts the GUI application, and loads Layout.fxml. 
  */
 package RISCVSimulator;
 
@@ -11,9 +12,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
-
 public class Main extends Application {
-
     public static void main(String[] args) {
         launch(args);
     }

@@ -1,5 +1,4 @@
-/**
- * File name: TableHelper.java
+/* File: TableHelper.java
  * Authors: Marc Sun Bøg & Simon Amtoft Pedersen
  * 
  * This file defines an object, which is used to make 2 column TableViews
