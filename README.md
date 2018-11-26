@@ -16,18 +16,25 @@ Simulates the [RV32I Base Instruction Set](https://content.riscv.org/wp-content/
 ## Java Development Kit 8/9
 ### Compile
 Assuming no other Java files present:
-
-```javac path/to/files/*.java```
+```
+javac path/to/files/*.java
+```
 ### Run
-```java path/to/package/RISCVSimulator.Main```
+```
+java path/to/package/RISCVSimulator.Main
+```
 ## OpenJDK 10+
 As OpenJDK no longer supplies a runtime environment or JavaFX, it is required to have [OpenJFX](https://openjfx.io/) downloaded.
 The path to OpenJFX will be referred to as `%PATH_TO_FX%`.
 ### Compile
-```javac --module-path %PATH_TO_FX% --add-modules javafx.fxml,javafx.base,javafx.controls,javafx.graphics path/to/files/*.java```
+```
+javac --module-path %PATH_TO_FX% --add-modules javafx.fxml,javafx.base,javafx.controls,javafx.graphics path/to/files/*.java
+```
 
 ### Run
 Requires a Java 11 Runtime Environment. This is easily obtained on Ubuntu through apt, but Windows users will need to use `jlink` to build their own.
 
-```java --module-path %PATH_TO_FX% --add-modules javafx.fxml,javafx.base,javafx.controls,javafx.graphics path/to/package/RISCVSimulator.Main```
+```
+java --module-path %PATH_TO_FX% --add-modules javafx.fxml,javafx.base,javafx.controls,javafx.graphics path/to/package/RISCVSimulator.Main
+```
 
