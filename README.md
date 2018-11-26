@@ -43,3 +43,4 @@ cd path/to/package
 java --module-path %PATH_TO_FX% --add-modules javafx.fxml,javafx.base,javafx.controls,javafx.graphics RISCVSimulator.Main
 ```
 
+Unfortunately, the program was not written with modular Java support in mind. For this reason, there is no better way of running the program, as it's not possible to use `jlink` in order to build the application with all dependencies bundled. Writing batch files or shell scripts is adviced.
