@@ -1,7 +1,8 @@
 /* File: Memory.java
  * Authors: Marc Sun Bog & Simon Amtoft Pedersen
  *
- * The following file has a memory byte array and handles input and read from the array
+ * The following file defines a memory byte array and handles input and output of this array.
+ * The array is able to store and load: bytes, halfwords and words. 
  */
 package RISCVSimulator;
 
@@ -24,7 +25,7 @@ public class Memory {
     // Stores a half word in the memory array
     void storeHalfWord(int addr, short data) {
         memory[addr]    = (byte) (data & 0x00FF);
-        memory[addr+1]  = (byte) (data &0xFF00);
+        memory[addr+1]  = (byte) ((data &0xFF00) >>> 8);
     }
 
     // Stores a word in the memory array
@@ -40,12 +41,12 @@ public class Memory {
         return memory[addr];
     }
 
-    // Returns half word from memory array given by address
+    // Returns half word from memory given by address
     int getHalfWord(int addr){
         return (getByte(addr+1) << 8) | (getByte(addr) & 0xFF);
     }
 
-    // Returns word from memory array given by address
+    // Returns word from memory given by address
     int getWord(int addr){
         return (getHalfWord(addr+2) << 16) | (getHalfWord(addr) & 0xFFFF);
     }
@@ -60,11 +61,10 @@ public class Memory {
         return returnValue;
     }
 
-    // Returns the memory array
     byte[] getMemory() {
         return memory;
     }
-
+	
     void setMemory(byte[] mem){
         this.memory = mem;
     }
