@@ -1,9 +1,37 @@
 # RISCV-Simulator
 An instruction set simulator for the RISC-V architecture written in Java.
+Written as the [last assignment](https://github.com/schoeberl/cae-lab/tree/master/finasgmt) for the course "02155: Computer Architecture and Engineering" at the Technical University of Denmark
 
-Simulating the RV32I Base Instruction Set given on page 104 in the following pdf: 
-https://content.riscv.org/wp-content/uploads/2017/05/riscv-spec-v2.2.pdf 
+Simulates the [RV32I Base Instruction Set](https://content.riscv.org/wp-content/uploads/2017/05/riscv-spec-v2.2.pdf) (excluding EBREAK, CSR* and fence*)
 
-The testing binary files (found under the folder 'tests') tests different instructions etc. 
+# Environment Calls
+| ID `x10` | Name | Description |
+|-------------|-------------| -----|
+| 1     | print_int | Prints integer in `x11` |
+| 4      | print_string | Prints null-terminated string whose address is in `x11`|
+| 10 | exit | Stops execution |
+| 11 | print_char | Prints character in `x11` |
 
-This simulator is made for the 3rd and last assignment of the course "Computer Architecture and Engineering" (course number: 02155) on the Danish Technical University: https://github.com/schoeberl/cae-lab/tree/master/finasgmt. 
+# Compiling and running
+Due to Java 8 reaching end-of-life soon, but still being most common, there are 2 ways of compiling:
+## Java Development Kit 8
+### Compile
+Assuming no other Java files present:
+
+```javac *.java```
+### Run
+Assuming current work directy is level above compiled Java class-files.
+
+```java RISCVSimulator.Main```
+## OpenJDK 11
+As OpenJDK no longer supplies a runtime environment or JavaFX, it is required to have [OpenJFX](https://openjfx.io/) downloaded.
+The path to OpenJFX will be referred to as `%PATH_TO_FX%`.
+
+### Compile
+```javac --module-path %PATH_TO_FX% --add-modules javafx.fxml,javafx.base,javafx.controls,javafx.graphics *.java```
+
+### Run
+Requires a Java 11 Runtime Environment. This is easily obtained on Ubuntu through apt, but Windows users will need to use `jlink` to build their own.
+
+```java --module-path %PATH_TO_FX% --add-modules javafx.fxml,javafx.base,javafx.controls,javafx.graphics RISCVSimulator.Main```
+
