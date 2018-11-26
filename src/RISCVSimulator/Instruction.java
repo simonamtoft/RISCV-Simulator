@@ -136,7 +136,6 @@ public class Instruction {
                         instr = "lhu";
                         break;
                 }
-                noRd = true;
                 break;
             case 0b0010011: // ADDI / SLTI / SLTIU / XORI / ORI / ANDI / SLLI / SRLI / SRAI
                 arg1 = String.format("x%d", rd);
