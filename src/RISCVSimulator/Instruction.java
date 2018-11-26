@@ -1,7 +1,8 @@
 /* File: Instruction.java
- * Authors: Marc Sun Bog & Simon Amtoft Pedersen
+ * Authors: Marc Sun Bøg & Simon Amtoft Pedersen
  *
- * The following file contains one RV32I instruction and all the possible fields
+ * The following file contains one RV32I instruction and all the possible fields.
+ * Also has a string the resembles the instruction as assembly language code. 
  */
 
 package RISCVSimulator;
@@ -14,7 +15,7 @@ public class Instruction {
 
     /**
      * Constructor
-     * Sets the instruction and finds all fields of instruction.
+     * Sets the instruction and decodes it.
      */
     public Instruction(int instruction) {
         this.instruction = instruction;
