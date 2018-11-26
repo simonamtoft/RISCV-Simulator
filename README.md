@@ -20,8 +20,9 @@ Assuming no other Java files present:
 javac path/to/files/*.java
 ```
 ### Run
+Assuming current work directory contains RISCVSimulator package directory:
 ```
-java path/to/package/RISCVSimulator.Main
+java RISCVSimulator.Main
 ```
 ## OpenJDK 10+
 As OpenJDK no longer supplies a runtime environment or JavaFX, it is required to have [OpenJFX](https://openjfx.io/) downloaded.
@@ -32,9 +33,9 @@ javac --module-path %PATH_TO_FX% --add-modules javafx.fxml,javafx.base,javafx.co
 ```
 
 ### Run
-Requires a Java 11 Runtime Environment. This is easily obtained on Ubuntu through apt, but Windows users will need to use `jlink` to build their own.
-
+Requires a Java 11 Runtime Environment. This is easily obtained on Ubuntu through apt, but Windows users will need to use `jlink` to build their own. See `Releases` for example.
+Assuming current work directory contains RISCVSimulator package directory:
 ```
-java --module-path %PATH_TO_FX% --add-modules javafx.fxml,javafx.base,javafx.controls,javafx.graphics path/to/package/RISCVSimulator.Main
+java --module-path %PATH_TO_FX% --add-modules javafx.fxml,javafx.base,javafx.controls,javafx.graphics RISCVSimulator.Main
 ```
 
