@@ -110,11 +110,13 @@ public class guiController implements Initializable{
             // Initialize processor
             program = getInstructions(file);
             cpu = new CPU(mem, program);
-            // Initialize pc, mem and register tables
+            
+			// Initialize pc, mem and register tables
             programTable.setItems(initializePcTable(program));
             memoryTable.setItems(initializeMemoryTable(0));
             registerTable.setItems(initializeRegisterTable());
-            // Display default stack pointer value
+            
+			// Display default stack pointer value
             replaceTableVal(registerTable, 2, String.format("%d", cpu.reg[2]));
             
 			// Default button states
@@ -215,10 +217,12 @@ public class guiController implements Initializable{
         cpu.pc = pcHistory.get(pcHistory.size() - 1);
         pcSelection.clearAndSelect(cpu.prevPc); //Select previous program counter
         regSelection.clearAndSelect(program[cpu.prevPc].rd);
-        //Revert register values
+        
+		//Revert register values
         System.arraycopy(regHistory.get(regHistory.size()-1), 0, cpu.reg, 0, 32);
         replaceTableVal(registerTable, program[cpu.pc].rd, String.format("%d", cpu.reg[program[cpu.pc].rd]));
-        //Delete from history
+        
+		//Delete from history
         pcHistory.remove(pcHistory.size() - 1);
         regHistory.remove(regHistory.size() - 1);
         if(pcHistory.isEmpty()){
