@@ -1,7 +1,8 @@
 /* File: guiController.java
- * Authors: Marc Sun Bog & Simon Amtoft Pedersen
+ * Authors: Marc Sun Bøg & Simon Amtoft Pedersen
  *
- * The following file handles the controls associated with the GUI
+ * The following file handles the flow of the entire program. 
+ * The methods in this file are mostly GUI methods, which uses methods from other files.
  */
 
 package RISCVSimulator;
@@ -21,17 +22,21 @@ import java.util.ResourceBundle;
 
 public class guiController implements Initializable{
     // CONSTANTS
-    private static final int BYTES_PR_PAGE = 256; // 64 words
-    private static final int MEMORY_SIZE = 10485760; // 10MiB memory
-    // Keeping track of memory table
+    private static final int BYTES_PR_PAGE = 256; 		// 64 words
+    private static final int MEMORY_SIZE = 10485760; 	// 10MiB memory
+    
+	// Keeping track of memory table
     private int tableRootAddress = 0;
-    // FXML ELEMENTS
+    
+	// FXML ELEMENTS
     private Stage primaryStage;
-    // UI elements
+    
+	// UI elements
     public VBox mainVBox;
     public MenuItem menuItemOpen;
     public MenuItem menuItemExit;
-    // Input
+    
+	// Input
     public Button buttonNext;
     public Button buttonPrevious;
     public Button buttonRun;
@@ -39,9 +44,11 @@ public class guiController implements Initializable{
     public Button buttonNextTable;
     public Button buttonPreviousTable;
     public TextField textFieldAddr;
-    // Output
+    
+	// Output
     public TextArea textFieldConsole;
-    // Table elements
+    
+	// Table elements
     public TableView<TableHelper> registerTable;
     public TableColumn<TableHelper, String> registerColumn;
     public TableColumn<TableHelper, String> registerValueColumn;
@@ -51,23 +58,21 @@ public class guiController implements Initializable{
     public TableView<TableHelper> programTable;
     public TableColumn<TableHelper, String> programColumn;
     public TableColumn<TableHelper, String> programInstructionColumn;
-    //Table selection
+    
+	//Table selection
     private TableView.TableViewSelectionModel<TableHelper> pcSelection;
     private TableView.TableViewSelectionModel<TableHelper> regSelection;
     private TableView.TableViewSelectionModel<TableHelper> memSelection;
-    // Controller variables
+    
+	// Controller variables
     private CPU cpu;
     private Instruction[] program;
     private Memory mem = new Memory(MEMORY_SIZE);
-    // History keeping for stepping back and forth
+    
+	// History keeping for stepping back and forth
     private ArrayList<int[]> regHistory = new ArrayList<>();
     private ArrayList<Integer> pcHistory = new ArrayList<>();
     private ArrayList<byte[]> memHistory = new ArrayList<>();
-    
-    // In order to pass primaryStage from Main.java
-    void setStage(Stage stage){
-        this.primaryStage = stage;
-    }
 
     /**
      * Runs in start of guiController.
@@ -79,11 +84,13 @@ public class guiController implements Initializable{
         programColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
         programInstructionColumn.setCellValueFactory(new PropertyValueFactory<>("value"));
         pcSelection = programTable.getSelectionModel();
-        // Register table
+        
+		// Register table
         registerColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
         registerValueColumn.setCellValueFactory(new PropertyValueFactory<>("value"));
         regSelection = registerTable.getSelectionModel();
-        // Memory table
+        
+		// Memory table
         memoryColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
         memoryDataColumn.setCellValueFactory(new PropertyValueFactory<>("value"));
         memSelection = memoryTable.getSelectionModel();
@@ -109,7 +116,8 @@ public class guiController implements Initializable{
             registerTable.setItems(initializeRegisterTable());
             // Display default stack pointer value
             replaceTableVal(registerTable, 2, String.format("%d", cpu.reg[2]));
-            // Default button states
+            
+			// Default button states
             buttonNext.setDisable(false);
             buttonRun.setDisable(false);
             buttonReset.setDisable(false);
@@ -189,13 +197,7 @@ public class guiController implements Initializable{
     }
 
     /**
-     * Exits application when Ctrl+Q is asserted or Exit button is pressed.
-     */
-    public void closeProgram() {
-        System.exit(0);
-    }
-
-    /**
+	 *  Handles action when 'previous' button is pressed.
      * Reverts differences caused by previously executed instruction
      */
     public void rewindOnce() {
@@ -263,7 +265,8 @@ public class guiController implements Initializable{
         registerTable.setItems(initializeRegisterTable());
         replaceTableVal(registerTable, 2, String.format("%d", cpu.reg[2]));
         programTable.setItems(initializePcTable(program));
-        // Clear selections
+        
+		// Clear selections
         pcSelection.clearSelection();
         memSelection.clearSelection();
         regSelection.clearSelection();
@@ -281,13 +284,17 @@ public class guiController implements Initializable{
         textFieldConsole.setText(null);
     }
 
+	// Exits application when Ctrl+Q is asserted or Exit button is pressed.
+    public void closeProgram() {
+        System.exit(0);
+    }
 
 
     /* HELPER METHODS FOR GUI CONTROL */
 
 
     /**
-     * Updates TableView with results from previous instruction
+     * Updates TableView with results from executed instruction
      */
     private void updateNext() {
         replaceTableVal(registerTable, program[cpu.prevPc].rd, String.format("%d", cpu.reg[program[cpu.prevPc].rd]));
@@ -311,6 +318,7 @@ public class guiController implements Initializable{
         memoryTable.setItems(initializeMemoryTable(tableRootAddress));
         setMemoryButtonStates();
     }
+	
     /**
      * Changes memory table view from tableRootAddress to tableRootAddress + BYTES_PR_PAGE
      * Disables corresponding button if needed.
@@ -323,7 +331,8 @@ public class guiController implements Initializable{
     }
 
     /**
-     * Attempts to parse textFieldAddr input as hexadecimal number. If no exception caught, change table view to said address.
+     * Attempts to parse textFieldAddr input as hexadecimal number. 
+	 * If no exception caught, change table view to said address.
      */
     public void gotoAddress() {
         int destAddr, addrOffset;
@@ -387,19 +396,17 @@ public class guiController implements Initializable{
 
     /**
      * Replaces value at given index in given table.
-     * @param table Target TableView object
-     * @param index Target index of table
-     * @param val Value to insert at index
+     * @param table: Target TableView object
+     * @param index: Target index of table
+     * @param val: Value to insert at index
      */
     private void replaceTableVal(TableView<TableHelper> table, int index, String val) {
         table.getItems().get(index).setValue(val);
     }
 
-    // This method simulates a console in the GUI. Outputs the input string on next line
-
     /**
      * Simulates console output by appending outPrint to what is already there.
-     * @param outPrint String to append
+     * @param outPrint: String to append
      */
     private void consolePrint(String outPrint) {
         textFieldConsole.setText(textFieldConsole.getText()+outPrint);
@@ -407,7 +414,7 @@ public class guiController implements Initializable{
 
     /**
      * Sets up program table.
-     * @param program An array of Instruction objects.
+     * @param program: An array of Instruction objects.
      * @return Returns a new ObservableList with Program Counter and Parsed Instruction
      */
     private ObservableList<TableHelper> initializePcTable(Instruction[] program){
@@ -420,7 +427,7 @@ public class guiController implements Initializable{
 
     /**
      * Sets up memory table
-     * @param startAddr Start address that will be displayed as index 0 in resulting list
+     * @param startAddr: Start address that will be displayed as index 0 in resulting list
      * @return Returns a new ObservableList consisting of (up to) BYTES_PR_PAGE / 4 rows.
      */
     private ObservableList<TableHelper> initializeMemoryTable(int startAddr){
@@ -446,7 +453,7 @@ public class guiController implements Initializable{
 
     /**
      * Adds instructions from binary file to program array
-     * @param f A RISC-V binary file
+     * @param f: A RISC-V binary file
      * @return Array of parsed instructions
      * @throws IOException Throws exception if file is busy
      */
@@ -465,8 +472,8 @@ public class guiController implements Initializable{
 
     /**
      * Reads content in registers x0 to x31 and outputs to file
-     * @param file Save destination
-     * @param reg Array of integers to output
+     * @param file: Save destination
+     * @param reg: Array of integers to output
      * @throws IOException Throws exception if file is busy.
      */
     private static void outToBin(File file, int[] reg) throws IOException {
@@ -475,5 +482,10 @@ public class guiController implements Initializable{
             dos.writeInt(Integer.reverseBytes(val));
         }
         dos.close();
+    }
+	
+	// Used to pass stage from main
+    void setStage(Stage stage){
+        this.primaryStage = stage;
     }
 }

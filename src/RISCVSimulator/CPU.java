@@ -1,11 +1,10 @@
 /* File: CPU.java
- * Authors: Marc Sun Bog & Simon Amtoft Pedersen
+ * Authors: Marc Sun Bøg & Simon Amtoft Pedersen
  *
  * The following file handles the execution of all the implemented instructions. 
  */
 
 package RISCVSimulator;
-
 
 public class CPU {
     int pc = 0;                     // Program counter
@@ -15,8 +14,9 @@ public class CPU {
     private Memory memory;          // Memory byte array
 
     /**
-     * Initializes a CPU with memory 'mem' and the instruction array 'program'
-     * and sp (x2) to point at last memory address.
+     * CPU constructor
+     * Sets stack pointer to last address in memory (last index of byte array memory.getMemory()).
+	 * Initializes memory and program to input parameters. 
      */
     public CPU(Memory mem, Instruction[] program) {
         this.memory = mem;                      // Initialize Memory object
@@ -25,7 +25,7 @@ public class CPU {
     }
 
     /**
-     * Executes one instruction given by the instruction array program at index given by the program counter
+     * Executes one instruction given by the Instruction array 'program' at index given by the program counter 'pc'. 
      * Uses the opcode field of the instruction to determine which type of instruction it is and call that method.
      */
     public void executeInstruction(){
