@@ -1,3 +1,10 @@
+/**
+ * File name: TableHelper.java
+ * Authors: Marc Sun Bøg & Simon Amtoft Pedersen
+ * 
+ * This file defines an object, which is used to make 2 column TableViews
+ */
+
 package RISCVSimulator;
 
 import javafx.beans.property.SimpleStringProperty;
