@@ -1,9 +1,9 @@
-.text
 addi x10, x0, 11
-auipc x11, char
-lb x11, 0(x11)
+lb x11, char
 ecall 
 
-.data 
+addi x10, x0, 10
+ecall
+
 char:
 .byte 'H'
