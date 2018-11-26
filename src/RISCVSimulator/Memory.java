@@ -1,5 +1,5 @@
 /* File: Memory.java
- * Authors: Marc Sun Bog & Simon Amtoft Pedersen
+ * Authors: Marc Sun Bøg & Simon Amtoft Pedersen
  *
  * The following file defines a memory byte array and handles input and output of this array.
  * The array is able to store and load: bytes, halfwords and words. 
