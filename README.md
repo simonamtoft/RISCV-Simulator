@@ -5,37 +5,43 @@ Written as the [last assignment](https://github.com/schoeberl/cae-lab/tree/maste
 Simulates the [RV32I Base Instruction Set](https://content.riscv.org/wp-content/uploads/2017/05/riscv-spec-v2.2.pdf) (excluding EBREAK, CSR* and fence*)
 
 # Environment Calls
-| ID `x10` | Name | Description |
-|-------------|-------------| -----|
-| 1     | print_int | Prints integer in `x11` |
-| 4      | print_string | Prints null-terminated string whose address is in `x11`|
-| 10 | exit | Stops execution |
-| 11 | print_char | Prints character in `x11` |
+| ID `x10`    | Name         | Description                                            |
+|-------------|--------------| -------------------------------------------------------|
+| 1           | print_int    | Prints integer in `x11`                                |
+| 4           | print_string | Prints null-terminated string whose address is in `x11`|
+| 10          | exit         | Stops execution                                        |
+| 11          | print_char   | Prints character in `x11`                              |
 
 # Compiling and running
-## Java Development Kit 8/9
+## Java Development Kit 8
+### Prerequisites
+Java SE 8 Development Kit.
 ### Compile
 Assuming no other Java files present:
 ```
-javac path/to/files/*.java
+cd path/to/package/files
+javac *.java
 ```
 ### Run
 Assuming current work directory contains RISCVSimulator package directory:
 ```
+cd path/to/package/
 java RISCVSimulator.Main
 ```
-## OpenJDK 10+
+## OpenJDK 11
 As OpenJDK no longer supplies a runtime environment or JavaFX, it is required to have [OpenJFX](https://openjfx.io/) downloaded.
 The path to OpenJFX will be referred to as `%PATH_TO_FX%`.
 ### Compile
 ```
-javac --module-path %PATH_TO_FX% --add-modules javafx.fxml,javafx.base,javafx.controls,javafx.graphics path/to/files/*.java
+cd path/to/package/files
+javac --module-path %PATH_TO_FX% --add-modules javafx.fxml,javafx.base,javafx.controls,javafx.graphics *.java
 ```
 
 ### Run
 Requires a Java 11 Runtime Environment. This is easily obtained on Ubuntu through apt, but Windows users will need to use `jlink` to build their own. See `Releases` for example.
 Assuming current work directory contains RISCVSimulator package directory:
 ```
+cd path/to/package
 java --module-path %PATH_TO_FX% --add-modules javafx.fxml,javafx.base,javafx.controls,javafx.graphics RISCVSimulator.Main
 ```
 
