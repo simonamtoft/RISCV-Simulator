@@ -17,6 +17,7 @@ Due to Java 8 reaching end-of-life soon, but still being most common, there are 
 ## Java Development Kit 8
 ### Compile
 Assuming no other Java files present:
+
 ```javac path/to/files/*.java```
 ### Run
 ```java path/to/package/RISCVSimulator.Main```
