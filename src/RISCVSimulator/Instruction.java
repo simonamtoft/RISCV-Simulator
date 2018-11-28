@@ -30,9 +30,6 @@ public class Instruction {
         
         // Immediate is different for all types
         switch(opcode) {
-            case 0b0110011: // R-type (only R-type uses funct7)
-                this.funct7 = (instruction >> 25) & 0x7F;   // bits 31 to 25
-                break; 
             case 0b1101111: // J-type
                 this.imm =  getImmJ(instruction);
                 break; 
@@ -40,6 +37,9 @@ public class Instruction {
             case 0b0000011: 
             case 0b0010011: 
                 this.imm = (instruction >> 20); // bits 31 to 20
+                // No break since I-type also uses funct7 in shift instructions  
+            case 0b0110011: // R-type
+                this.funct7 = (instruction >> 25) & 0x7F;   // bits 31 to 25
                 break; 
             case 0b0100011: // S-type
                 imm = (((instruction >> 20) & 0xFFFFFFE0) |
