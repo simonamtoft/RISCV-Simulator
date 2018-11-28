@@ -376,7 +376,7 @@ public class guiController implements Initializable{
      * Gets address from previously executed instruction and updates table view accordingly
      */
     private void updateMemoryTable(){
-        int addr = (cpu.reg[program[cpu.prevPc].rs1] + program[cpu.prevPc].immS) & 0xFFFFFFFC; // Remove byte offset
+        int addr = (cpu.reg[program[cpu.prevPc].rs1] + program[cpu.prevPc].imm) & 0xFFFFFFFC; // Remove byte offset
         int addrOffset;
         // Check if requested address is in same block as tableRootAddress
         if( addr / BYTES_PR_PAGE == tableRootAddress / BYTES_PR_PAGE){
