@@ -8,7 +8,7 @@
 package RISCVSimulator;
 
 public class Instruction {
-    int instruction, opcode, rd, rs1, rs2, funct3, funct7, immI, immS, immB, immU, immJ;
+    int instruction, opcode, rd, rs1, rs2, funct3, funct7, imm;
     boolean noRd = false;
     boolean sType = false;
     boolean ecall = false;
@@ -19,20 +19,46 @@ public class Instruction {
      * Sets the instruction and decodes it.
      */
     public Instruction(int instruction) {
+        // Used in nearly all 
         this.instruction = instruction;
-        this.opcode = instruction & 0x7F;               // First 7 bits
+        this.opcode = instruction & 0x7F;   // First 7 bits
         this.rd = (instruction >> 7) & 0x1F;            // bits 11 to 7
         this.funct3 = (instruction >> 12) & 0x7;        // bits 14 to 12
-        this.funct7 = (instruction >> 25) & 0x7F;       // bits 31 to 25
         this.rs1 = (instruction >> 15) & 0x1F;          // bits 19 to 15
         this.rs2 = (instruction >> 20) & 0x1F;          // bits 24 to 20
-        this.immI = (instruction >> 20);                // bits 31 to 20
-        this.immS = (((instruction >> 20) & 0xFFFFFFE0) |
-                ((instruction >>> 7) & 0x0000001F));    // Returns bits 31 to 25 and 11 to 7
-        this.immB = getImmB(instruction);
-        this.immU = instruction & 0xFFFFF000;
-        this.immJ = getImmJ(instruction);
         this.assemblyString = toAssemblyString();
+        
+        // Immediate is different for all types
+        switch(opcode) {
+            case 0b0110011: // R-type (only R-type uses funct7)
+                this.funct7 = (instruction >> 25) & 0x7F;   // bits 31 to 25
+                break; 
+            case 0b1101111: // J-type
+                this.imm =  getImmJ(instruction);
+                break; 
+            case 0b1100111: // I-type
+            case 0b0000011: 
+            case 0b0010011: 
+                this.imm = (instruction >> 20); // bits 31 to 20
+                break; 
+            case 0b0100011: // S-type
+                imm = (((instruction >> 20) & 0xFFFFFFE0) |
+                ((instruction >>> 7) & 0x0000001F));    // Returns bits 31 to 25 and 11 to 7
+                break; 
+            case 0b1100011: // B-type
+                this.imm = getImmB(instruction);
+                break; 
+            case 0b0110111:// U-type
+            case 0b0010111:
+                this.imm = instruction & 0xFFFFF000;
+                break; 
+            default: 
+                // R-type and ECALL doesn't have an immediate
+                break; 
+        }
+        
+        
+        
     }
 
 
