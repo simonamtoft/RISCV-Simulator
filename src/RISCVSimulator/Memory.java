@@ -24,8 +24,8 @@ public class Memory {
 
     // Stores a half word in the memory array
     void storeHalfWord(int addr, short data) {
-        memory[addr]    = (byte) (data & 0x00FF);
-        memory[addr+1]  = (byte) ((data &0xFF00) >>> 8);
+        memory[addr]    = (byte) ((data & 0x00FF));
+        memory[addr+1]  = (byte) ((data & 0xFF00) >>> 8);
     }
 
     // Stores a word in the memory array
@@ -51,12 +51,13 @@ public class Memory {
         return (getHalfWord(addr+2) << 16) | (getHalfWord(addr) & 0xFFFF);
     }
 
-    // Returns string starting at the address given and ends when next memory address is zero. UN-TESTED
+    // Returns string starting at the address given and ends when next memory address is zero.
     String getString(int addr){
         String returnValue = "";
         int i = 0;
         while(memory[addr+i] != 0){
-            returnValue += (char) (memory[addr+i]);
+	    returnValue += (char) (memory[addr+i]);
+	    i++;
         }
         return returnValue;
     }

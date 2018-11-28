@@ -125,7 +125,7 @@ public class guiController implements Initializable{
             buttonReset.setDisable(false);
             textFieldAddr.setDisable(false);
             if(BYTES_PR_PAGE < MEMORY_SIZE) buttonNextTable.setDisable(false);
-            textFieldConsole.setText(null);
+            textFieldConsole.setText("");
             primaryStage.setTitle("RV32I Simulator - "+file.getName());
         } else {
             program = null;
@@ -285,7 +285,7 @@ public class guiController implements Initializable{
         regHistory = new ArrayList<>();
         memHistory = new ArrayList<>();
         pcHistory  = new ArrayList<>();
-        textFieldConsole.setText(null);
+        textFieldConsole.setText("");
     }
 
 	// Exits application when Ctrl+Q is asserted or Exit button is pressed.
@@ -306,6 +306,19 @@ public class guiController implements Initializable{
         pcSelection.getTableView().scrollTo(cpu.prevPc);
         if(program[cpu.prevPc].noRd){
             if(program[cpu.prevPc].sType) updateMemoryTable();
+            if(program[cpu.prevPc].ecall) {
+                switch(cpu.reg[10]){
+                    case 1:
+                        consolePrint(String.format("%d", cpu.reg[11]));
+                        break;
+                    case 4:
+                        consolePrint(mem.getString(cpu.reg[11]));
+                        break;
+                    case 11:
+                        consolePrint(String.format("%c", cpu.reg[11]));
+                        break;
+                }
+            }
             return;
         }
         regSelection.clearAndSelect(program[cpu.prevPc].rd);
@@ -342,7 +355,7 @@ public class guiController implements Initializable{
         int destAddr, addrOffset;
         try{
             destAddr = Integer.parseInt(textFieldAddr.getText(), 16);
-            textFieldAddr.setText(null);
+            textFieldAddr.setText("");
         } catch (NumberFormatException e){
             textFieldConsole.setText("Failed to parse 32bit hexadecimal address (without 0x-prefix)");
             return;
