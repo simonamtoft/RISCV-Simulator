@@ -13,6 +13,12 @@ Simulates the [RV32I Base Instruction Set](https://content.riscv.org/wp-content/
 | 11          | print_char   | Prints character in `x11`                              |
 
 # Compiling and running
+## Install packages
+If you haven't run a JavaFX application on Ubuntu before run the following command: 
+```
+sudo apt-get install openjfx
+```
+
 ## Java Development Kit 8
 ### Compile
 Assuming no other Java files present:
