@@ -40,13 +40,13 @@ public class CPU {
             // J-type instruction
             case 0b1101111: //JAL
                 reg[inst.rd] = (pc+1)<<2; // Store address of next instruction in bytes
-                pc += inst.immJ>>2;
+                pc += inst.imm>>2;
                 break;
                 
             // I-type instructions
             case 0b1100111: // JALR
                 reg[inst.rd] = (pc+1)<<2;
-                pc = ((reg[inst.rs1] + inst.immI) & 0xFFFFFFFE)>>2;
+                pc = ((reg[inst.rs1] + inst.imm) & 0xFFFFFFFE)>>2;
                 break;
             case 0b0000011: // LB / LH / LW / LBU / LHU
                 iTypeLoad(inst);
@@ -70,11 +70,11 @@ public class CPU {
             
             //U-type instructions
             case 0b0110111: //LUI
-                reg[inst.rd] = inst.immU;
+                reg[inst.rd] = inst.imm;
                 pc++;
                 break;
             case 0b0010111: //AUIPC
-                reg[inst.rd] = (pc << 2) + inst.immU; // Shift pc because we count in 4 byte words
+                reg[inst.rd] = (pc << 2) + inst.imm; // Shift pc because we count in 4 byte words
                 pc++;
                 break;
         }
@@ -171,34 +171,34 @@ public class CPU {
     private void iTypeInteger(Instruction inst) {
         switch(inst.funct3){
             case 0b000: // ADDI
-                reg[inst.rd] = reg[inst.rs1] + inst.immI;
+                reg[inst.rd] = reg[inst.rs1] + inst.imm;
                 break;
             case 0b010: // SLTI
-                if(reg[inst.rs1] < inst.immI)
+                if(reg[inst.rs1] < inst.imm)
                     reg[inst.rd] = 1;
                 else
                     reg[inst.rd] = 0;
                 break;
             case 0b011: // SLTIU
-                if(Integer.toUnsignedLong(reg[inst.rs1]) < Integer.toUnsignedLong(inst.immI))
+                if(Integer.toUnsignedLong(reg[inst.rs1]) < Integer.toUnsignedLong(inst.imm))
                     reg[inst.rd] = 1;
                 else
                     reg[inst.rd] = 0;
                 break;
             case 0b100: // XORI
-                reg[inst.rd] = reg[inst.rs1] ^ inst.immI;
+                reg[inst.rd] = reg[inst.rs1] ^ inst.imm;
                 break;
             case 0b110: // ORI
-                reg[inst.rd] = reg[inst.rs1] | inst.immI;
+                reg[inst.rd] = reg[inst.rs1] | inst.imm;
                 break;
             case 0b111: // ANDI
-                reg[inst.rd] = reg[inst.rs1] & inst.immI;
+                reg[inst.rd] = reg[inst.rs1] & inst.imm;
                 break;
             case 0b001: // SLLI
-                reg[inst.rd] = reg[inst.rs1] << inst.immI;
+                reg[inst.rd] = reg[inst.rs1] << inst.imm;
                 break;
             case 0b101: // SRLI / SRAI
-                int ShiftAmt = inst.immI & 0x1F; // The amount of shifting done by SRLI or SRAI
+                int ShiftAmt = inst.imm & 0x1F; // The amount of shifting done by SRLI or SRAI
                 switch(inst.funct7){
                     case 0b0000000: // SRLI
                         reg[inst.rd] = reg[inst.rs1] >>> ShiftAmt;
@@ -248,7 +248,7 @@ public class CPU {
      * SB / SH / SW
      */
     private void sType(Instruction inst) {
-        int addr = reg[inst.rs1] + inst.immS;
+        int addr = reg[inst.rs1] + inst.imm;
         switch(inst.funct3){
             case 0b000: // SB
                 memory.storeByte(addr,(byte) reg[inst.rs2]);
@@ -268,25 +268,25 @@ public class CPU {
      * BEQ / BNE / BLT / BGE / BLTU / BGEU
      */
     private void bType(Instruction inst) {
-        int ImmB = inst.immB >> 2; //We're counting in words instead of bytes
+        int Imm = inst.imm >> 2; //We're counting in words instead of bytes
         switch(inst.funct3){
             case 0b000: // BEQ
-                pc += (reg[inst.rs1] == reg[inst.rs2]) ? ImmB : 1;
+                pc += (reg[inst.rs1] == reg[inst.rs2]) ? Imm : 1;
                 break;
             case 0b001: // BNE
-                pc += (reg[inst.rs1] != reg[inst.rs2]) ? ImmB : 1;
+                pc += (reg[inst.rs1] != reg[inst.rs2]) ? Imm : 1;
                 break;
             case 0b100: // BLT
-                pc += (reg[inst.rs1] < reg[inst.rs2]) ? ImmB : 1;
+                pc += (reg[inst.rs1] < reg[inst.rs2]) ? Imm : 1;
                 break;
             case 0b101: // BGE
-                pc += (reg[inst.rs1] >= reg[inst.rs2]) ? ImmB : 1;
+                pc += (reg[inst.rs1] >= reg[inst.rs2]) ? Imm : 1;
                 break;
             case 0b110: //BLTU
-                pc += (Integer.toUnsignedLong(reg[inst.rs1]) < Integer.toUnsignedLong(reg[inst.rs2])) ? ImmB : 1;
+                pc += (Integer.toUnsignedLong(reg[inst.rs1]) < Integer.toUnsignedLong(reg[inst.rs2])) ? Imm : 1;
                 break;
             case 0b111: //BLGEU
-                pc += (Integer.toUnsignedLong(reg[inst.rs1]) >= Integer.toUnsignedLong(reg[inst.rs2])) ? ImmB : 1;
+                pc += (Integer.toUnsignedLong(reg[inst.rs1]) >= Integer.toUnsignedLong(reg[inst.rs2])) ? Imm : 1;
                 break;
         }
     }
