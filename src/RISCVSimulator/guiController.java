@@ -22,21 +22,21 @@ import java.util.ResourceBundle;
 
 public class guiController implements Initializable{
     // CONSTANTS
-    private static final int BYTES_PR_PAGE = 256; 		// 64 words
+    private static final int BYTES_PR_PAGE = 256; 	// 64 words
     private static final int MEMORY_SIZE = 10485760; 	// 10MiB memory
     
-	// Keeping track of memory table
+    // Keeping track of memory table
     private int tableRootAddress = 0;
     
-	// FXML ELEMENTS
+    // FXML ELEMENTS
     private Stage primaryStage;
     
-	// UI elements
+    // UI elements
     public VBox mainVBox;
     public MenuItem menuItemOpen;
     public MenuItem menuItemExit;
     
-	// Input
+    // Input
     public Button buttonNext;
     public Button buttonPrevious;
     public Button buttonRun;
@@ -45,10 +45,10 @@ public class guiController implements Initializable{
     public Button buttonPreviousTable;
     public TextField textFieldAddr;
     
-	// Output
+    // Output
     public TextArea textFieldConsole;
     
-	// Table elements
+    // Table elements
     public TableView<TableHelper> registerTable;
     public TableColumn<TableHelper, String> registerColumn;
     public TableColumn<TableHelper, String> registerValueColumn;
@@ -59,17 +59,17 @@ public class guiController implements Initializable{
     public TableColumn<TableHelper, String> programColumn;
     public TableColumn<TableHelper, String> programInstructionColumn;
     
-	//Table selection
+    //Table selection
     private TableView.TableViewSelectionModel<TableHelper> pcSelection;
     private TableView.TableViewSelectionModel<TableHelper> regSelection;
     private TableView.TableViewSelectionModel<TableHelper> memSelection;
     
-	// Controller variables
+    // Controller variables
     private CPU cpu;
     private Instruction[] program;
     private Memory mem = new Memory(MEMORY_SIZE);
     
-	// History keeping for stepping back and forth
+    // History keeping for stepping back and forth
     private ArrayList<int[]> regHistory = new ArrayList<>();
     private ArrayList<Integer> pcHistory = new ArrayList<>();
     private ArrayList<byte[]> memHistory = new ArrayList<>();
@@ -85,12 +85,12 @@ public class guiController implements Initializable{
         programInstructionColumn.setCellValueFactory(new PropertyValueFactory<>("value"));
         pcSelection = programTable.getSelectionModel();
         
-		// Register table
+	// Register table
         registerColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
         registerValueColumn.setCellValueFactory(new PropertyValueFactory<>("value"));
         regSelection = registerTable.getSelectionModel();
         
-		// Memory table
+	// Memory table
         memoryColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
         memoryDataColumn.setCellValueFactory(new PropertyValueFactory<>("value"));
         memSelection = memoryTable.getSelectionModel();
@@ -111,15 +111,15 @@ public class guiController implements Initializable{
             program = getInstructions(file);
             cpu = new CPU(mem, program);
             
-			// Initialize pc, mem and register tables
+	    // Initialize pc, mem and register tables
             programTable.setItems(initializePcTable(program));
             memoryTable.setItems(initializeMemoryTable(0));
             registerTable.setItems(initializeRegisterTable());
             
-			// Display default stack pointer value
+	    // Display default stack pointer value
             replaceTableVal(registerTable, 2, String.format("%d", cpu.reg[2]));
             
-			// Default button states
+	    // Default button states
             buttonNext.setDisable(false);
             buttonRun.setDisable(false);
             buttonReset.setDisable(false);
@@ -199,7 +199,7 @@ public class guiController implements Initializable{
     }
 
     /**
-	 *  Handles action when 'previous' button is pressed.
+     * Handles action when 'previous' button is pressed.
      * Reverts differences caused by previously executed instruction
      */
     public void rewindOnce() {
@@ -218,11 +218,11 @@ public class guiController implements Initializable{
         pcSelection.clearAndSelect(cpu.prevPc); //Select previous program counter
         regSelection.clearAndSelect(program[cpu.prevPc].rd);
         
-		//Revert register values
+	//Revert register values
         System.arraycopy(regHistory.get(regHistory.size()-1), 0, cpu.reg, 0, 32);
         replaceTableVal(registerTable, program[cpu.pc].rd, String.format("%d", cpu.reg[program[cpu.pc].rd]));
         
-		//Delete from history
+	//Delete from history
         pcHistory.remove(pcHistory.size() - 1);
         regHistory.remove(regHistory.size() - 1);
         if(pcHistory.isEmpty()){
@@ -248,11 +248,13 @@ public class guiController implements Initializable{
         buttonNext.setDisable(true);
         buttonPrevious.setDisable(true);
         buttonRun.setDisable(true);
-        // Clear selections
+        
+	// Clear selections
         pcSelection.clearSelection();
         memSelection.clearSelection();
         regSelection.clearSelection();
-        // Clear history
+        
+	// Clear history
         regHistory = new ArrayList<>();
         memHistory = new ArrayList<>();
         pcHistory  = new ArrayList<>();
@@ -270,7 +272,7 @@ public class guiController implements Initializable{
         replaceTableVal(registerTable, 2, String.format("%d", cpu.reg[2]));
         programTable.setItems(initializePcTable(program));
         
-		// Clear selections
+	// Clear selections
         pcSelection.clearSelection();
         memSelection.clearSelection();
         regSelection.clearSelection();
