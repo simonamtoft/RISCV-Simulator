@@ -217,7 +217,7 @@ public class Instruction {
                         break;
                     case 0b111: // CSRRCI
                         instr = "csrrci";
-                        break:
+                        break;
                 }
                 noRd = true;
                 break;
