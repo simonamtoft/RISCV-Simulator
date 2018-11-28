@@ -2,7 +2,7 @@
 An instruction set simulator for the RISC-V architecture written in Java.
 Written as the [last assignment](https://github.com/schoeberl/cae-lab/tree/master/finasgmt) for the course "02155: Computer Architecture and Engineering" at the Technical University of Denmark
 
-Simulates the [RV32I Base Instruction Set](https://content.riscv.org/wp-content/uploads/2017/05/riscv-spec-v2.2.pdf) (excluding EBREAK, CSR* and fence*)
+Simulates the [RV32I Base Instruction Set](https://content.riscv.org/wp-content/uploads/2017/05/riscv-spec-v2.2.pdf) (excluding EBREAK, CSR*, fence* and some environment calls)
 
 # Environment Calls
 | ID `x10`    | Name         | Description                                            |
