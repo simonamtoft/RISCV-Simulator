@@ -26,8 +26,7 @@ public class Instruction {
         this.funct3 = (instruction >> 12) & 0x7;    // bits 14 to 12
         this.rs1 = (instruction >> 15) & 0x1F;      // bits 19 to 15
         this.rs2 = (instruction >> 20) & 0x1F;      // bits 24 to 20
-        this.assemblyString = toAssemblyString();   // The instruction show in assembly code
-        
+
         // Immediate is different for all types
         switch(opcode) {
             case 0b1101111: // J-type
@@ -56,6 +55,8 @@ public class Instruction {
                 // R-type and ECALL doesn't have an immediate
                 break; 
         }
+
+        this.assemblyString = toAssemblyString();   // The instruction show in assembly code
     }
 
 
@@ -133,17 +134,17 @@ public class Instruction {
                 break;
             case 0b1101111: //JAL
                 arg1 = String.format("x%d", rd);
-                arg2 = String.format("x%d", immJ);
+                arg2 = String.format("x%d", imm);
                 instr = "jal";
                 break;
             case 0b1100111: // JALR
                 arg1 = String.format("x%d", rd);
-                arg2 = String.format("x%d", immI);
+                arg2 = String.format("x%d", imm);
                 instr = "jalr";
                 break;
             case 0b0000011: // LB / LH / LW / LBU / LHU
                 arg1 = String.format("x%d", rd);
-                arg2 = String.format("%d(x%d)", immI, rs1);
+                arg2 = String.format("%d(x%d)", imm, rs1);
                 switch(funct3){
                     case 0b000: // LB
                         instr = "lb";
@@ -165,7 +166,7 @@ public class Instruction {
             case 0b0010011: // ADDI / SLTI / SLTIU / XORI / ORI / ANDI / SLLI / SRLI / SRAI
                 arg1 = String.format("x%d", rd);
                 arg2 = String.format("x%d", rs1);
-                arg3 = String.format("%d", immI);
+                arg3 = String.format("%d", imm);
                 switch(funct3){
                     case 0b000: // ADDI
                         instr = "addi";
@@ -213,7 +214,7 @@ public class Instruction {
             case 0b1110011: // ECALL / EBREAK / CSRRW / CSRRS / CSRRC / CSRRWI / CSRRSI / CSRRCI
                 switch(funct3){
                     case 0b000: // ECALL / EBREAK
-                        switch(immI){
+                        switch(imm){
                             case 0b000000000000: // ECALL
                                 instr = "ecall";
                                 ecall = true;
@@ -248,7 +249,7 @@ public class Instruction {
             //S-type instructions
             case 0b0100011: //SB / SH / SW
                 arg1 = String.format("x%d", rs2);
-                arg2 = String.format("%d(x%d)", immS, rs1);
+                arg2 = String.format("%d(x%d)", imm, rs1);
                 switch(funct3){
                     case 0b000: // SB
                         instr = "sb";
@@ -268,7 +269,7 @@ public class Instruction {
             case 0b1100011: // BEQ / BNE / BLT / BGE / BLTU / BGEU
                 arg1 = String.format("x%d", rs1);
                 arg2 = String.format("x%d", rs2);
-                arg3 = String.format("%d", immB);
+                arg3 = String.format("%d", imm);
                 switch(funct3){
                     case 0b000: // BEQ
                         instr = "beq";
@@ -295,12 +296,12 @@ public class Instruction {
             //U-type instructions
             case 0b0110111: //LUI
                 arg1 = String.format("x%d", rd);
-                arg2 = String.format("%d", immU >>> 12);
+                arg2 = String.format("%d", imm >>> 12);
                 instr = "lui";
                 break;
             case 0b0010111: //AUIPC
                 arg1 = String.format("x%d", rd);
-                arg2 = String.format("%d", immU >>> 12);
+                arg2 = String.format("%d", imm >>> 12);
                 instr = "auipc";
                 break;
             default:

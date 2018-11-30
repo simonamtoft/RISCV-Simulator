@@ -140,7 +140,7 @@ public class CPU {
      * LB / LH / LW / LBU / LHU
      */
     private void iTypeLoad(Instruction inst) {
-        int addr = reg[inst.rs1] + inst.immI; // Byte address
+        int addr = reg[inst.rs1] + inst.imm; // Byte address
 
         switch(inst.funct3){
             case 0b000: // LB
