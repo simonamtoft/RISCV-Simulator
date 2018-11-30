@@ -21,12 +21,12 @@ public class Instruction {
     public Instruction(int instruction) {
         // Used in nearly all 
         this.instruction = instruction;
-        this.opcode = instruction & 0x7F;   // First 7 bits
-        this.rd = (instruction >> 7) & 0x1F;            // bits 11 to 7
-        this.funct3 = (instruction >> 12) & 0x7;        // bits 14 to 12
-        this.rs1 = (instruction >> 15) & 0x1F;          // bits 19 to 15
-        this.rs2 = (instruction >> 20) & 0x1F;          // bits 24 to 20
-        this.assemblyString = toAssemblyString();
+        this.opcode = instruction & 0x7F;           // First 7 bits
+        this.rd = (instruction >> 7) & 0x1F;        // bits 11 to 7
+        this.funct3 = (instruction >> 12) & 0x7;    // bits 14 to 12
+        this.rs1 = (instruction >> 15) & 0x1F;      // bits 19 to 15
+        this.rs2 = (instruction >> 20) & 0x1F;      // bits 24 to 20
+        this.assemblyString = toAssemblyString();   // The instruction show in assembly code
         
         // Immediate is different for all types
         switch(opcode) {
@@ -56,9 +56,6 @@ public class Instruction {
                 // R-type and ECALL doesn't have an immediate
                 break; 
         }
-        
-        
-        
     }
 
 
